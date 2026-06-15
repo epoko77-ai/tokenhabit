@@ -1,5 +1,10 @@
 # tokenhabit
 
+[![PyPI](https://img.shields.io/pypi/v/tokenhabit.svg)](https://pypi.org/project/tokenhabit/)
+[![Python](https://img.shields.io/pypi/pyversions/tokenhabit.svg)](https://pypi.org/project/tokenhabit/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![No deps](https://img.shields.io/badge/dependencies-none-success.svg)](pyproject.toml)
+
 **What's leaking your Claude Code tokens?** Scan your local logs and find out in one command.
 
 `ccusage` tells you *how much* you spent. **`tokenhabit` tells you *which habits* spent it — and how to stop.**

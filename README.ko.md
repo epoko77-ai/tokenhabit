@@ -1,5 +1,10 @@
 # tokenhabit
 
+[![PyPI](https://img.shields.io/pypi/v/tokenhabit.svg)](https://pypi.org/project/tokenhabit/)
+[![Python](https://img.shields.io/pypi/pyversions/tokenhabit.svg)](https://pypi.org/project/tokenhabit/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![No deps](https://img.shields.io/badge/dependencies-none-success.svg)](pyproject.toml)
+
 **무엇이 당신의 Claude Code 토큰을 새게 하는가?** 로컬 로그를 스캔해 한 줄로 알려줍니다.
 
 `ccusage`가 *얼마* 썼는지 알려준다면, **`tokenhabit`은 *어떤 습관이* 그걸 썼는지 — 그리고 어떻게 멈추는지**를 알려줍니다.
