@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: PyPI package
+    url: https://pypi.org/project/tokenhabit/
+    about: Install instructions and version history
