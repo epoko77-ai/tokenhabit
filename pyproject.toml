@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tokenhabit"
-version = "1.2.0"
+version = "1.2.1"
 description = "Scan your Claude Code logs and find the habits silently burning your tokens. No LLM calls, no dependencies, runs offline."
 readme = "README.md"
 requires-python = ">=3.9"
