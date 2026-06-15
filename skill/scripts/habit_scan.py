@@ -386,6 +386,20 @@ def try_ccusage(days: int) -> str | None:
     return None
 
 
+def _grade(ratio: float) -> str:
+    """낭비 비율 → A~F 등급 (패키지 report.py와 동일 임계). +/- 등급은 쓰지 않는다."""
+    pct = ratio * 100
+    if pct < 5:
+        return "A"
+    if pct < 12:
+        return "B"
+    if pct < 20:
+        return "C"
+    if pct < 30:
+        return "D"
+    return "F"
+
+
 def print_report(agg: dict, days: int, file_count: int):
     """사람이 읽기 좋은 형식으로 출력."""
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -413,6 +427,26 @@ def print_report(agg: dict, days: int, file_count: int):
     # 패턴별 집계 (카운트 내림차순)
     counts = agg["pattern_counts"]
     detected = {k: v for k, v in counts.items() if not k.endswith("_tokens") and v > 0}
+
+    # Token Waste Score — 패키지 CLI(report.py)와 동일 계산. 신호(H2-04·H8-03) 제외,
+    # 분모 = billable = total - cache_read. 이 등급이 진단의 헤드라인이며 SSOT다.
+    pre_waste = 0
+    for pid, cnt in detected.items():
+        if pid in SIGNAL_PATTERNS:
+            continue
+        info = CATALOG.get(pid)
+        if not info:
+            continue
+        w = info["token_est_per_hit"] * cnt
+        if pid == "H2-02":
+            raw = counts.get("H2-02_tokens", 0)
+            if raw > 0:
+                w = raw
+        pre_waste += w
+    billable = max(total_tok - total_cr, 1)
+    ratio = pre_waste / billable
+    print(f"\n  토큰 낭비 점수: {_grade(ratio)}  —  토큰의 약 {ratio*100:.0f}%가 습관적으로 낭비됨 ({pre_waste:,} tok)")
+
     if not detected:
         print("\n감지된 습관 패턴 없음. 잘 하고 있습니다!")
         return
