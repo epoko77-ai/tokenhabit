@@ -64,10 +64,8 @@ pip install tokenhabit
 
 Then just run `tokenhabit`. It scans `~/.claude/projects/*.jsonl` for the last 7 days and prints your report.
 
-> Until the PyPI release lands, run straight from this repo:
-> ```bash
-> uvx --from git+https://github.com/epoko77-ai/tokenhabit tokenhabit
-> ```
+> Prefer the bleeding edge? Run straight from the repo:
+> `uvx --from git+https://github.com/epoko77-ai/tokenhabit tokenhabit`
 
 ## Usage
 

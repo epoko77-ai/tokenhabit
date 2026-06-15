@@ -54,10 +54,8 @@ pip install tokenhabit
 
 그다음 `tokenhabit --lang ko` 만 실행하면 됩니다. 최근 7일 `~/.claude/projects/*.jsonl` 을 스캔해 리포트를 출력합니다.
 
-> PyPI 배포 전까지는 이 레포에서 바로 실행:
-> ```bash
-> uvx --from git+https://github.com/epoko77-ai/tokenhabit tokenhabit --lang ko
-> ```
+> 최신 개발 버전을 원하면 레포에서 바로 실행:
+> `uvx --from git+https://github.com/epoko77-ai/tokenhabit tokenhabit --lang ko`
 
 ## 사용법
 
