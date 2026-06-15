@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/thumbnail_ko.png" alt="tokenhabit — Claude Code 토큰을 몰래 태우는 습관을 찾아냅니다">
+</p>
+
 # tokenhabit
 
 [![PyPI](https://img.shields.io/pypi/v/tokenhabit.svg)](https://pypi.org/project/tokenhabit/)

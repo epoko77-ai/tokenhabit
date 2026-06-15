@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/thumbnail_en.png" alt="tokenhabit — find the habits silently burning your Claude Code tokens">
+</p>
+
 # tokenhabit
 
 [![PyPI](https://img.shields.io/pypi/v/tokenhabit.svg)](https://pypi.org/project/tokenhabit/)

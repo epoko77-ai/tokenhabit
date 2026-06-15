@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{ --cyan:#2dd4bf; --red:#fb5e7e; --bg0:#0a0e13; --bg1:#10161f; --card:#0d1117; --bd:#222c38; --tx:#e8eef5; --mut:#8a98a8; }
+  html,body{ width:1280px; height:640px; }
+  body{
+    font-family:'Pretendard',-apple-system,sans-serif;
+    background:
+      radial-gradient(900px 500px at 78% 18%, rgba(45,212,191,.10), transparent 60%),
+      radial-gradient(700px 600px at 8% 95%, rgba(251,94,126,.07), transparent 55%),
+      linear-gradient(135deg,var(--bg0),var(--bg1));
+    color:var(--tx); overflow:hidden; position:relative;
+  }
+  .grid{ position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+    background-size:40px 40px; mask-image:radial-gradient(1000px 700px at 30% 40%,#000,transparent 80%); }
+  .wrap{ position:relative; height:100%; display:flex; align-items:center; gap:54px; padding:0 76px; }
+  .left{ flex:1.15; }
+  .kicker{ font-family:'JetBrains Mono',monospace; font-size:15px; letter-spacing:.22em; text-transform:uppercase; color:var(--cyan); font-weight:500; margin-bottom:22px; display:flex; align-items:center; gap:10px;}
+  .kicker::before{ content:""; width:26px; height:2px; background:var(--cyan); display:inline-block; }
+  h1{ font-size:104px; font-weight:800; letter-spacing:-.035em; line-height:.95; }
+  h1 .b{ color:var(--cyan); }
+  .tag{ font-size:33px; font-weight:700; line-height:1.32; margin-top:24px; color:#f4f8fc; max-width:600px; letter-spacing:-.01em; }
+  .sub{ font-size:18.5px; color:var(--mut); margin-top:18px; font-weight:500; }
+  .cmd{ display:inline-flex; align-items:center; gap:12px; margin-top:30px; font-family:'JetBrains Mono',monospace; font-size:21px; background:#0c1219; border:1px solid var(--bd); border-radius:11px; padding:13px 20px; color:#cdd9e5; }
+  .cmd .d{ color:var(--cyan); font-weight:700; }
+  .meta{ display:flex; gap:18px; margin-top:30px; font-size:15px; color:var(--mut); font-weight:500; }
+  .meta span{ display:flex; align-items:center; gap:7px; }
+  .dot{ width:6px; height:6px; border-radius:50%; background:var(--cyan); }
+  .term{ flex:.92; background:linear-gradient(180deg,#0e141c,#0b1016); border:1px solid var(--bd); border-radius:16px; box-shadow:0 40px 80px -30px rgba(0,0,0,.7); overflow:hidden; }
+  .bar{ display:flex; gap:8px; padding:15px 18px; border-bottom:1px solid #1a232e; align-items:center; }
+  .bar i{ width:12px; height:12px; border-radius:50%; display:inline-block; }
+  .bar .t{ margin-left:12px; font-family:'JetBrains Mono',monospace; font-size:13px; color:#5e6b7a; }
+  .body{ padding:24px 26px; font-family:'JetBrains Mono',monospace; font-size:15.5px; line-height:1.95; }
+  .body .ko{ font-family:'Pretendard',sans-serif; }
+  .score{ font-size:19px; font-weight:700; }
+  .score .g{ color:var(--red); }
+  .row{ color:#aab6c4; }
+  .row .id{ color:var(--red); font-weight:700; }
+  .row.cy .id{ color:var(--cyan); }
+  .x{ color:#5e6b7a; }
+  .share{ color:var(--cyan); margin-top:10px; font-size:14.5px; }
+  .muted{ color:#5e6b7a; font-size:13px; margin-top:4px; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="wrap">
+    <div class="left">
+      <div class="kicker">Claude Code · 토큰 진단</div>
+      <h1>token<span class="b">habit</span></h1>
+      <div class="tag">당신의 Claude Code 토큰을<br>몰래 태우는 습관을 찾아냅니다.</div>
+      <div class="sub">로컬 로그 스캔 · 낭비 습관 순위 · 복붙 가능한 처방</div>
+      <div class="cmd"><span class="d">$</span> uvx tokenhabit --lang ko</div>
+      <div class="meta">
+        <span><i class="dot"></i>LLM 호출 0</span>
+        <span><i class="dot"></i>의존성 0</span>
+        <span><i class="dot"></i>오프라인</span>
+        <span><i class="dot"></i>MIT</span>
+      </div>
+    </div>
+    <div class="term">
+      <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">tokenhabit — 습관 진단</span></div>
+      <div class="body">
+        <div class="score ko">토큰 낭비 점수: <span class="g">F</span> — 약 14% 낭비</div>
+        <div style="height:14px"></div>
+        <div class="row"><span class="id">[H1-03]</span> <span class="ko">compaction 적체</span> <span class="x">×217</span></div>
+        <div class="row"><span class="id">[H1-01]</span> <span class="ko">주제 드래그</span> <span class="x">×221</span></div>
+        <div class="row"><span class="id">[H4-03]</span> <span class="ko">캐시 킬 스위치</span> <span class="x">×78</span></div>
+        <div class="row cy"><span class="id">[H2-01]</span> <span class="ko">파일 리드 재탕</span> <span class="x">×289</span></div>
+        <div class="share ko">공유: 내 토큰의 약 14%를 낭비하고 있었다 →</div>
+        <div class="muted ko">습관마다 복붙 가능한 fix 제공</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
