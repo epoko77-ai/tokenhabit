@@ -1,0 +1,8 @@
+{"timestamp": "2026-06-11T14:00:00Z", "message": {"id": "s2-0", "role": "assistant", "usage": {"input_tokens": 8000, "output_tokens": 1000, "cache_read_input_tokens": 20000, "cache_creation_input_tokens": 2000}}}
+{"timestamp": "2026-06-11T14:20:00Z", "message": {"id": "s2-1", "role": "assistant", "usage": {"input_tokens": 22000, "output_tokens": 1000, "cache_read_input_tokens": 200, "cache_creation_input_tokens": 0}}}
+{"timestamp": "2026-06-11T14:30:00Z", "message": {"id": "s2-v0", "role": "assistant", "usage": {"input_tokens": 1200, "output_tokens": 4800, "cache_read_input_tokens": 500, "cache_creation_input_tokens": 0}}}
+{"timestamp": "2026-06-11T14:35:00Z", "message": {"id": "s2-v1", "role": "assistant", "usage": {"input_tokens": 1200, "output_tokens": 4800, "cache_read_input_tokens": 500, "cache_creation_input_tokens": 0}}}
+{"timestamp": "2026-06-11T14:40:00Z", "message": {"id": "s2-v2", "role": "assistant", "usage": {"input_tokens": 1200, "output_tokens": 4800, "cache_read_input_tokens": 500, "cache_creation_input_tokens": 0}}}
+{"timestamp": "2026-06-11T14:45:00Z", "message": {"id": "s2-v3", "role": "assistant", "usage": {"input_tokens": 1200, "output_tokens": 4800, "cache_read_input_tokens": 500, "cache_creation_input_tokens": 0}}}
+{"timestamp": "2026-06-11T14:50:00Z", "message": {"id": "s2-v4", "role": "assistant", "usage": {"input_tokens": 1200, "output_tokens": 4800, "cache_read_input_tokens": 500, "cache_creation_input_tokens": 0}}}
+{"timestamp": "2026-06-11T14:55:00Z", "message": {"id": "s2-v5", "role": "assistant", "usage": {"input_tokens": 1200, "output_tokens": 4800, "cache_read_input_tokens": 500, "cache_creation_input_tokens": 0}}}

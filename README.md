@@ -15,6 +15,10 @@ No LLM calls. No dependencies. Runs fully offline on your own `~/.claude` logs.
 
 ---
 
+![tokenhabit scanning your logs and scoring token-wasting habits](assets/demo.gif)
+
+<sub>Sample run on synthetic logs — your real numbers will differ.</sub>
+
 ```console
 $ uvx tokenhabit
 
