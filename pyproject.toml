@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tokenhabit"
+version = "1.1.0"
+description = "Scan your Claude Code logs and find the habits silently burning your tokens. No LLM calls, no dependencies, runs offline."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Seunghyun Lee", email = "epoko@nate.com" }]
+keywords = ["claude", "claude-code", "tokens", "cost", "llm", "ccusage", "anthropic"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/epoko77/tokenhabit"
+Repository = "https://github.com/epoko77/tokenhabit"
+Issues = "https://github.com/epoko77/tokenhabit/issues"
+
+[project.scripts]
+tokenhabit = "tokenhabit.cli:main"
+
+[tool.hatchling.build.targets.wheel]
+packages = ["tokenhabit"]

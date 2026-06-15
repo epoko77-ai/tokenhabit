@@ -3,8 +3,9 @@
 tokenhabit — habit_scan.py  v1.1
 
 목적: ~/.claude/projects/*/*.jsonl 직접 파싱 → 습관 진단 리포트.
-범위: 전체 25패턴 중 JSONL에서 정량 자동감지 가능한 일부(현재 8패턴:
-  H1-01, H1-03, H2-01, H2-02, H4-03, H5-04, H8-01, H8-02)만 자동 진단한다.
+범위: 전체 28패턴 중 JSONL에서 정량 자동감지 가능한 일부(현재 10패턴:
+  H1-01, H1-03, H2-01, H2-02, H2-04, H4-03, H5-04, H8-01, H8-02, H8-03)만 자동 진단한다.
+  단, H2-04(웹 결과)·H8-03(서브에이전트)은 빈도 신호이므로 Waste 합산에서 제외한다.
   나머지 패턴(프롬프트 명료성·CLAUDE.md 설정·MCP 구성 등)은 JSONL만으로 판정할 수
   없으므로 references/habit_catalog.md 카탈로그로 자가점검한다.
 측정(집계)은 ccusage에 위임하고, 우리는 raw 메시지 단위 패턴 감지 + 카탈로그 ID 매핑이 차별점.
@@ -45,6 +46,11 @@ LARGE_TOOL_RESULT_CHARS = 8_000     # 이 이상이면 stdout 홍수(H2-02/H8-02
 VERBOSE_OUTPUT_RATIO = 0.5          # output/input > 이 비율이면 H5-04 신호
 SESSION_MAX_MINUTES = 35            # 이 분 초과면 H1-01/H1-03 신호
 SESSION_MAX_TOKENS = 50_000         # 이 토큰 초과면 H1-03 신호
+TASKS_PER_SESSION_FLAG = 6          # 세션당 Task 이 개수 이상이면 서브에이전트 남발(H8-03) 신호
+
+# 빈도 신호 패턴: 목록에는 표시하되 총 추정 낭비에는 합산하지 않는다
+# (서브에이전트·웹툴은 정당한 도구라 raw 카운트를 낭비로 합산하면 과장됨).
+SIGNAL_PATTERNS = {"H2-04", "H8-03"}
 
 # 카탈로그 패턴 정보 (ID, 이름, 즉시 fix 요약)
 CATALOG = {
@@ -62,6 +68,16 @@ CATALOG = {
         "name": "stdout 홍수 (Bash 결과 대형)",
         "fix": "Bash 명령에 | head -50 또는 | grep 필터 추가. 파일 저장 후 경로만 전달.",
         "token_est_per_hit": 5_000,
+    },
+    "H2-04": {
+        "name": "웹 결과 방치 (WebFetch/WebSearch)",
+        "fix": "리서치는 서브에이전트로 위임해 요약만 반환받기. 같은 페이지 재페치 금지, 쿼리는 좁게.",
+        "token_est_per_hit": 2_000,
+    },
+    "H8-03": {
+        "name": "서브에이전트 남발 (Task 다수 생성)",
+        "fix": "탐색·대형 독립·병렬 작업만 위임. 단순 편집·이미 아는 정보는 메인에서 직접.",
+        "token_est_per_hit": 8_000,
     },
     "H5-04": {
         "name": "장황 출력 유도",
@@ -166,6 +182,8 @@ def analyze_session(jsonl_path: Path) -> dict[str, Any]:
     large_tool_result_tokens: int = 0
     verbose_output_hits: int = 0             # H5-04
     cache_drops: int = 0                     # H4-03
+    task_calls: int = 0                      # H8-03 (서브에이전트 Task 호출)
+    web_calls: int = 0                       # H2-04 (WebFetch/WebSearch)
     # H8-01: "한 assistant 메시지(턴) 내 동시 Read 개수" 최대치 (휴리스틱·근사).
     # tool_result/턴 경계에서 자연히 리셋되도록 메시지 단위로 카운트한다.
     max_reads_in_one_turn: int = 0
@@ -248,6 +266,10 @@ def analyze_session(jsonl_path: Path) -> dict[str, Any]:
                         read_file_paths.append(str(fp))
                     reads_this_turn += 1
                     max_reads_in_one_turn = max(max_reads_in_one_turn, reads_this_turn)
+                elif tool_name == "Task":
+                    task_calls += 1
+                elif tool_name in ("WebFetch", "WebSearch"):
+                    web_calls += 1
 
             # tool_result: 대형 출력 탐지 (H2-02/H8-02)
             elif btype == "tool_result":
@@ -300,6 +322,8 @@ def analyze_session(jsonl_path: Path) -> dict[str, Any]:
         "H1-01_long_session": 1 if long_session else 0,
         "H1-03_token_overrun": 1 if total_tokens_all > SESSION_MAX_TOKENS else 0,
         "H8-01_max_reads_in_one_turn": max_reads_in_one_turn,
+        "H8-03_task_calls": task_calls,
+        "H2-04_web_calls": web_calls,
     }
 
 
@@ -328,6 +352,10 @@ def aggregate(results: list[dict]) -> dict[str, Any]:
         # H8-01: 한 턴에 Read >= 4개 몰아 읽은 세션 수 (근사)
         if r["H8-01_max_reads_in_one_turn"] >= 4:
             agg["H8-01"] += 1
+        # H2-04: 웹 호출 총수 / H8-03: 세션당 Task >= 임계 세션 수 (빈도 신호)
+        agg["H2-04"] += r["H2-04_web_calls"]
+        if r["H8-03_task_calls"] >= TASKS_PER_SESSION_FLAG:
+            agg["H8-03"] += 1
 
     return {
         "pattern_counts": dict(agg),
@@ -399,23 +427,28 @@ def print_report(agg: dict, days: int, file_count: int):
         info = CATALOG.get(pattern_id)
         if not info:
             continue
-        waste = info["token_est_per_hit"] * count
-        total_waste_est += waste
+        is_signal = pattern_id in SIGNAL_PATTERNS
 
         # H2-02는 추정 토큰이 직접 계산된 값 사용
+        waste = info["token_est_per_hit"] * count
         if pattern_id == "H2-02":
             raw_waste = counts.get("H2-02_tokens", 0)
             if raw_waste > 0:
                 waste = raw_waste
 
         print(f"\n  [{pattern_id}] {info['name']}  ×{count}회")
-        print(f"  추정 낭비: ~{waste:,} 토큰")
+        if is_signal:
+            print(f"  빈도 신호 — 점수 미반영 ({count}회; 맥락으로 판단)")
+        else:
+            total_waste_est += waste
+            print(f"  추정 낭비: ~{waste:,} 토큰")
         print(f"  즉시 fix: {info['fix']}")
 
     print(f"\n{'─'*60}")
-    print(f"  총 추정 낭비: ~{total_waste_est:,} 토큰")
+    print(f"  총 추정 낭비: ~{total_waste_est:,} 토큰  (빈도 신호 H2-04·H8-03 제외)")
     print(f"\n  * 수치는 경향 파악용 근사치입니다.")
     print(f"  * H8-01(메인스레드 탐색)은 한 턴에 Read ≥4개 몰아 읽은 세션 수 (근사).")
+    print(f"  * H8-03=서브에이전트 6+ 세션 수, H2-04=웹 호출 수 — 정상 사용 포함 빈도 신호.")
     print(f"{'='*60}\n")
 
 
