@@ -459,7 +459,9 @@ def main() -> int:
         description="tokenhabit habit_scan — JSONL 파싱 기반 습관 진단 (25패턴 중 자동감지 가능한 8패턴)"
     )
     ap.add_argument("--days", type=int, default=7, metavar="N",
-                    help="최근 N일 분석 (기본 7)")
+                    help="최근 N일 전체 세션 분석 (기본 7)")
+    ap.add_argument("--current", action="store_true",
+                    help="현재(가장 최근 수정된) 세션 1개만 분석 — '이 세션' 진단")
     ap.add_argument("--project", type=Path, metavar="PATH",
                     help="특정 프로젝트 디렉토리")
     ap.add_argument("--session", type=Path, metavar="FILE",
@@ -468,11 +470,16 @@ def main() -> int:
                     help="JSON 형식으로 출력")
     args = ap.parse_args()
 
-    files = collect_jsonl_files(
-        project_dir=args.project,
-        session_file=args.session,
-        days=args.days,
-    )
+    if args.current:
+        # 가장 최근 수정된 jsonl 1개 = 현재/직전 세션
+        pool = collect_jsonl_files(days=36500)
+        files = [max(pool, key=lambda p: p.stat().st_mtime)] if pool else []
+    else:
+        files = collect_jsonl_files(
+            project_dir=args.project,
+            session_file=args.session,
+            days=args.days,
+        )
 
     if not files:
         msg = f"분석할 .jsonl 파일 없음 (기간: {args.days}일, 경로: {CLAUDE_PROJECTS_DIR})"

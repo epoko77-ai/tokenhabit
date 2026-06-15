@@ -43,7 +43,8 @@ def main(argv: list[str] | None = None) -> int:
         prog="tokenhabit",
         description="Scan your Claude Code logs and find the habits burning your tokens.",
     )
-    ap.add_argument("--days", type=int, default=7, metavar="N", help="analyze the last N days (default 7)")
+    ap.add_argument("--days", type=int, default=7, metavar="N", help="analyze the last N days, all sessions (default 7)")
+    ap.add_argument("--current", action="store_true", help="only the current (most recently modified) session — 'this session'")
     ap.add_argument("--project", type=Path, metavar="PATH", help="a specific project directory")
     ap.add_argument("--session", type=Path, metavar="FILE", help="a single .jsonl session file")
     ap.add_argument("--lang", choices=["en", "ko"], default="en", help="report language (default en)")
@@ -56,7 +57,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.no_color:
         set_color(False)
 
-    files = collect_jsonl_files(project_dir=args.project, session_file=args.session, days=args.days)
+    if args.current:
+        pool = collect_jsonl_files(days=36500)
+        files = [max(pool, key=lambda p: p.stat().st_mtime)] if pool else []
+    else:
+        files = collect_jsonl_files(project_dir=args.project, session_file=args.session, days=args.days)
     if not files:
         msg = STR.get(args.lang, STR["en"])["no_files"].format(days=args.days, path=CLAUDE_PROJECTS_DIR)
         if args.json:
