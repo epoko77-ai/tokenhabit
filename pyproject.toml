@@ -22,9 +22,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/epoko77/tokenhabit"
-Repository = "https://github.com/epoko77/tokenhabit"
-Issues = "https://github.com/epoko77/tokenhabit/issues"
+Homepage = "https://github.com/epoko77-ai/tokenhabit"
+Repository = "https://github.com/epoko77-ai/tokenhabit"
+Issues = "https://github.com/epoko77-ai/tokenhabit/issues"
 
 [project.scripts]
 tokenhabit = "tokenhabit.cli:main"

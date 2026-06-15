@@ -66,7 +66,7 @@ Then just run `tokenhabit`. It scans `~/.claude/projects/*.jsonl` for the last 7
 
 > Until the PyPI release lands, run straight from this repo:
 > ```bash
-> uvx --from git+https://github.com/epoko77/tokenhabit tokenhabit
+> uvx --from git+https://github.com/epoko77-ai/tokenhabit tokenhabit
 > ```
 
 ## Usage
@@ -83,7 +83,7 @@ tokenhabit --ccusage            # also show `npx ccusage daily` totals
 
 ## What it detects
 
-tokenhabit reads your raw session logs and flags the habits that quietly burn tokens. The eight it can measure directly from logs:
+tokenhabit reads your raw session logs and flags the habits that quietly burn tokens. The ten it can measure directly from logs:
 
 | ID | Habit | Fix |
 |----|-------|-----|
@@ -91,12 +91,15 @@ tokenhabit reads your raw session logs and flags the habits that quietly burn to
 | **H1-03** | Compaction overrun (token pile-up) | Manual `/compact [focus]` before ~50K |
 | **H2-01** | Re-reading the same file | Reference what's already in context |
 | **H2-02** | Dumping full logs / stdout flood | Filter with `grep`/`head` first |
+| **H2-04** | Stranded web results *(signal)* | Delegate research to a subagent |
 | **H4-03** | Cache-kill switch (hit-rate crash) | Don't switch model/effort mid-session |
 | **H5-04** | Inviting verbose output | Cap output ("in 2 lines") |
 | **H8-01** | Main-thread exploration | Delegate sweeps to a subagent |
 | **H8-02** | stdout flood (large Bash output) | Pipe to `head`/save to file |
+| **H8-03** | Subagent overuse *(signal)* | Delegate only big independent work |
 
-These are 8 of a larger 25-pattern habit catalog. The remaining patterns
+These are 10 of a larger 28-pattern habit catalog (*signal* = frequency-only,
+not scored into the waste total). The remaining patterns
 (prompt clarity, CLAUDE.md hygiene, MCP setup, …) can't be judged from logs
 alone — for full interactive coaching, see [the Claude Code skill](#the-claude-code-skill) below.
 
@@ -124,7 +127,7 @@ They're complementary. ccusage measures; tokenhabit diagnoses and prescribes.
 ## The Claude Code skill
 
 tokenhabit also ships as a Claude Code **skill** for interactive coaching across
-the full 25-pattern catalog (session triage, prompt rewriting, runtime guard
+the full 28-pattern catalog (session triage, prompt rewriting, runtime guard
 hooks). See [`skill/`](skill/). The CLI is the fast offline scan; the skill is
 the deeper coach.
 

@@ -56,7 +56,7 @@ pip install tokenhabit
 
 > PyPI 배포 전까지는 이 레포에서 바로 실행:
 > ```bash
-> uvx --from git+https://github.com/epoko77/tokenhabit tokenhabit --lang ko
+> uvx --from git+https://github.com/epoko77-ai/tokenhabit tokenhabit --lang ko
 > ```
 
 ## 사용법
@@ -72,7 +72,7 @@ tokenhabit --lang ko --ccusage        # ccusage daily 총계 함께 표시
 
 ## 무엇을 감지하나
 
-로그에서 직접 정량 측정 가능한 8개 습관:
+로그에서 직접 정량 측정 가능한 10개 습관:
 
 | ID | 습관 | 즉시 fix |
 |----|------|---------|
@@ -80,12 +80,14 @@ tokenhabit --lang ko --ccusage        # ccusage daily 총계 함께 표시
 | **H1-03** | compaction 버스 막차 (누적 토큰 과다) | 50K 전 수동 `/compact [포커스]` |
 | **H2-01** | 파일 리드 재탕 | 컨텍스트 내 참조 유도 |
 | **H2-02** | 로그 전체 덤프 / stdout 홍수 | `grep`·`head`로 먼저 필터 |
+| **H2-04** | 웹 결과 방치 *(신호)* | 리서치는 서브에이전트로 위임 |
 | **H4-03** | 캐시 킬 스위치 (히트율 급락) | 세션 중 모델·effort 전환 자제 |
 | **H5-04** | 장황 출력 유도 | 출력 제한("2줄로만") |
 | **H8-01** | 메인 스레드 탐색 | 탐색은 서브에이전트로 위임 |
 | **H8-02** | stdout 홍수 (Bash 대형 출력) | `head`로 파이프·파일 저장 |
+| **H8-03** | 서브에이전트 남발 *(신호)* | 대형 독립 작업만 위임 |
 
-이 8개는 전체 **25패턴** 카탈로그의 일부입니다. 나머지(프롬프트 명료성·CLAUDE.md 위생·MCP 구성 등)는 로그만으로 판정할 수 없어, 전체 코칭은 아래 Claude Code 스킬이 담당합니다.
+이 10개는 전체 **28패턴** 카탈로그의 일부입니다(*신호* = 빈도만 집계, Waste 점수 미반영). 나머지(프롬프트 명료성·CLAUDE.md 위생·MCP 구성 등)는 로그만으로 판정할 수 없어, 전체 코칭은 아래 Claude Code 스킬이 담당합니다.
 
 ## 점수 계산 방식
 
@@ -105,7 +107,7 @@ tokenhabit --lang ko --ccusage        # ccusage daily 총계 함께 표시
 
 ## Claude Code 스킬
 
-tokenhabit은 전체 25패턴 카탈로그 인터랙티브 코칭(세션 진단·프롬프트 재작성·런타임 가드 훅)을 위한 Claude Code **스킬**로도 제공됩니다. [`skill/`](skill/) 참고. CLI는 빠른 오프라인 스캔, 스킬은 더 깊은 코치입니다.
+tokenhabit은 전체 28패턴 카탈로그 인터랙티브 코칭(세션 진단·프롬프트 재작성·런타임 가드 훅)을 위한 Claude Code **스킬**로도 제공됩니다. [`skill/`](skill/) 참고. CLI는 빠른 오프라인 스캔, 스킬은 더 깊은 코치입니다.
 
 ## 프라이버시
 
