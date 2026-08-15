@@ -29,5 +29,23 @@ Issues = "https://github.com/epoko77-ai/tokenhabit/issues"
 [project.scripts]
 tokenhabit = "tokenhabit.cli:main"
 
-[tool.hatchling.build.targets.wheel]
+[tool.hatch.build.targets.wheel]
 packages = ["tokenhabit"]
+
+# The sdist ships the project, not the workshop. Without an explicit allowlist
+# hatchling packs the whole tree — 1.2.x shipped _workspace/07_thumbnail/node_modules/
+# (playwright-core, ~4.5MB) and .claude/settings.local.json to PyPI.
+[tool.hatch.build.targets.sdist]
+include = [
+    "/tokenhabit",
+    "/skill",
+    "/tests",
+    "/README.md",
+    "/README.ko.md",
+    "/CHANGELOG.md",
+    "/LICENSE",
+]
+exclude = [
+    "**/__pycache__",
+    "**/*.pyc",
+]
