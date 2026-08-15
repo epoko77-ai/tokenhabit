@@ -14,7 +14,7 @@ Usage:
   # Claude Code가 stdin으로 hook payload JSON을 전달
   python3 hook_check.py userprompt
   python3 hook_check.py pretooluse
-  python3 hook_check.py --self-test
+  python3 hook_check.py self-test
 
 settings.json 등록 예제:
   {
@@ -79,9 +79,24 @@ FILTER_PATTERNS = [
     r"2>/dev/null",
 ]
 
-# 임시 파일 기반 세션 상태. 세션 ID는 환경변수, 없으면 pid 폴백.
+# 임시 파일 기반 세션 상태. 훅 payload 의 session_id 가 1순위 —
+# 환경변수는 항상 채워지지 않고, ppid 는 재사용되면 다른 세션의 read-set 을 물려받는다.
+_PAYLOAD_SESSION_ID: str | None = None
+
+
+def _set_payload_session_id(payload: dict) -> None:
+    global _PAYLOAD_SESSION_ID
+    sid = payload.get("session_id")
+    if isinstance(sid, str) and sid.strip():
+        _PAYLOAD_SESSION_ID = sid.strip()
+
+
 def _session_key() -> str:
-    session_id = os.environ.get("CLAUDE_SESSION_ID") or f"pid{os.getppid()}"
+    session_id = (
+        _PAYLOAD_SESSION_ID
+        or os.environ.get("CLAUDE_SESSION_ID")
+        or f"pid{os.getppid()}"
+    )
     return re.sub(r"[^a-zA-Z0-9_-]", "_", session_id)[:40]
 
 
@@ -229,6 +244,9 @@ def check_pretooluse(payload: dict) -> None:
         file_path = str(tool_input.get("file_path", "")).strip()
         if not file_path:
             return
+        # 대형 파일을 offset/limit 으로 나눠 읽는 것은 올바른 패턴이지 재탕이 아니다.
+        if tool_input.get("offset") is not None or tool_input.get("limit") is not None:
+            return
 
         already_read = _load_session_reads()
         if file_path in already_read:
@@ -326,6 +344,8 @@ def main() -> int:
     try:
         raw = sys.stdin.read()
         payload = json.loads(raw) if raw.strip() else {}
+        if isinstance(payload, dict):
+            _set_payload_session_id(payload)
     except Exception:
         payload = {}
 

@@ -50,7 +50,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--lang", choices=["en", "ko"], default="en", help="report language (default en)")
     ap.add_argument("--json", action="store_true", help="machine-readable JSON output")
     ap.add_argument("--no-color", action="store_true", help="disable ANSI color")
-    ap.add_argument("--ccusage", action="store_true", help="augment with `npx ccusage daily` totals")
+    ap.add_argument("--include-subagents", action="store_true",
+                    help="also score subagent transcripts (off by default: they are not your habits)")
+    ap.add_argument("--ccusage", action="store_true", help="augment with `npx ccusage daily` totals (network)")
     ap.add_argument("--version", action="version", version=f"tokenhabit {__version__}")
     args = ap.parse_args(argv)
 
@@ -58,10 +60,15 @@ def main(argv: list[str] | None = None) -> int:
         set_color(False)
 
     if args.current:
-        pool = collect_jsonl_files(days=36500)
+        pool = collect_jsonl_files(days=36500, include_subagents=args.include_subagents)
         files = [max(pool, key=lambda p: p.stat().st_mtime)] if pool else []
     else:
-        files = collect_jsonl_files(project_dir=args.project, session_file=args.session, days=args.days)
+        files = collect_jsonl_files(
+            project_dir=args.project,
+            session_file=args.session,
+            days=args.days,
+            include_subagents=args.include_subagents,
+        )
     if not files:
         msg = STR.get(args.lang, STR["en"])["no_files"].format(days=args.days, path=CLAUDE_PROJECTS_DIR)
         if args.json:
@@ -70,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
             print(msg, file=sys.stderr)
         return 1
 
-    results = [analyze_session(f) for f in files]
+    results = [analyze_session(f, include_subagents=args.include_subagents) for f in files]
     agg = aggregate(results)
 
     if args.json:
@@ -89,16 +96,21 @@ def main(argv: list[str] | None = None) -> int:
                 "total_output": agg["total_output"],
                 "total_cache_read": agg["total_cache_read"],
             },
+            "models": agg.get("models", {}),
             "pattern_counts": {
                 k: v for k, v in agg["pattern_counts"].items()
                 if not k.endswith("_tokens") and v > 0
+            },
+            "pattern_waste_tokens": {
+                k: v for k, v in agg["pattern_counts"].items()
+                if k.endswith("_tokens") and v > 0
             },
             "sessions": results,
         }, ensure_ascii=False, indent=2))
         return 0
 
     ccusage_out = _try_ccusage() if args.ccusage else None
-    render(agg, args.days, len(files), args.lang, ccusage_out)
+    render(agg, args.days, len(files), args.lang, ccusage_out, current=args.current)
     return 0
 
 

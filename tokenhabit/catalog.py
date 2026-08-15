@@ -1,9 +1,14 @@
 """Pattern catalog (i18n).
 
 Each entry holds a per-hit token estimate (trend-only approximation) plus a
-localized name and a copy-pasteable fix. These IDs map back to the 28-pattern
+localized name and a copy-pasteable fix. These IDs map back to the 31-pattern
 habit catalog in the Claude Code skill; only the subset that is quantitatively
 auto-detectable from JSONL logs lives here.
+
+`measured: True` means the reported waste comes from token counts the log
+actually recorded (tool-result size, cache_creation burned by a model switch,
+context carried past the ceiling). `measured: False` means the waste is a
+scenario constant multiplied by a hit count — directional, not billing.
 """
 
 from __future__ import annotations
@@ -11,6 +16,7 @@ from __future__ import annotations
 CATALOG: dict[str, dict] = {
     "H2-01": {
         "token_est_per_hit": 2_000,
+        "measured": False,
         "en": {
             "name": "Re-reading the same file",
             "fix": 'Reference what you already read ("from the X you read earlier...") '
@@ -23,18 +29,20 @@ CATALOG: dict[str, dict] = {
     },
     "H2-02": {
         "token_est_per_hit": 5_000,
+        "measured": True,
         "en": {
-            "name": "Dumping full logs / stdout flood",
-            "fix": "Filter before running: pipe through grep -A5 'FAIL|ERROR' or | head -50. "
-            "Save to a file and pass the path.",
+            "name": "Oversized tool results pulled into context",
+            "fix": "Narrow the request before you make it: read a line range, grep first, "
+            "or save the payload to a file and pass the path.",
         },
         "ko": {
-            "name": "로그 전체 덤프 / stdout 홍수",
-            "fix": "grep -A5 'FAIL|ERROR'로 필터 후 실행. PreToolUse hook 설정.",
+            "name": "대형 툴 결과 컨텍스트 적재",
+            "fix": "요청 전에 범위를 좁혀라 — 줄 범위 지정, grep 선행, 또는 파일로 저장 후 경로만 전달.",
         },
     },
     "H8-02": {
         "token_est_per_hit": 5_000,
+        "measured": True,
         "en": {
             "name": "stdout flood (large Bash output)",
             "fix": "Add | head -50 or a grep filter to Bash commands. "
@@ -47,6 +55,7 @@ CATALOG: dict[str, dict] = {
     },
     "H2-04": {
         "token_est_per_hit": 2_000,
+        "measured": False,
         "en": {
             "name": "Stranded web results (WebFetch/WebSearch)",
             "fix": "Delegate research to a subagent so only the summary returns. "
@@ -59,18 +68,20 @@ CATALOG: dict[str, dict] = {
     },
     "H8-03": {
         "token_est_per_hit": 8_000,
+        "measured": False,
         "en": {
-            "name": "Subagent overuse (many Task spawns)",
+            "name": "Subagent overuse (many spawns in one session)",
             "fix": "Delegate only exploration / large independent / parallelizable work. "
             "Do simple edits and known-context queries on the main thread.",
         },
         "ko": {
-            "name": "서브에이전트 남발 (Task 다수 생성)",
+            "name": "서브에이전트 남발 (한 세션 다수 생성)",
             "fix": "탐색·대형 독립·병렬 작업만 위임. 단순 편집·이미 아는 정보는 메인에서 직접.",
         },
     },
     "H5-04": {
         "token_est_per_hit": 800,
+        "measured": False,
         "en": {
             "name": "Inviting verbose output",
             "fix": 'Cap the output: "in 2 lines", "no code or examples". '
@@ -83,39 +94,66 @@ CATALOG: dict[str, dict] = {
     },
     "H4-03": {
         "token_est_per_hit": 21_000,
+        "measured": True,
         "en": {
-            "name": "Cache-kill switch (cache hit-rate crash)",
-            "fix": "Avoid switching model/effort mid-session. Open a new session when you must switch.",
+            "name": "Cache-kill switch (model swapped mid-session)",
+            "fix": "Switching model mid-session voids the prompt cache — the whole prefix is "
+            "re-written at 1.25x instead of being read at 0.1x. Pick the tier first, "
+            "or open a new session to switch.",
         },
         "ko": {
-            "name": "캐시 킬 스위치 (캐시 히트율 급락)",
-            "fix": "세션 내 모델·effort 전환 최소화. 전환 필요 시 새 세션 오픈.",
+            "name": "캐시 킬 스위치 (세션 중 모델 전환)",
+            "fix": "세션 중 모델 전환은 프롬프트 캐시를 무효화한다 — 프리픽스 전체가 0.1x 읽기 대신 "
+            "1.25x 쓰기로 재작성된다. 티어를 먼저 정하거나, 전환은 새 세션에서.",
+        },
+    },
+    "H4-04": {
+        "token_est_per_hit": 0,
+        "measured": False,
+        "en": {
+            "name": "Top-tier-only driving (never switched models)",
+            "fix": "Official list prices differ 5x (Opus 5 vs Haiku 4.5) to 10x "
+            "(Fable 5 vs Haiku 4.5). Route by task: /model for lighter tiers on "
+            "mechanical edits; lint, format and rename need no model at all.",
+        },
+        "ko": {
+            "name": "최상위 모델 고정 주행 (티어 전환 0회)",
+            "fix": "공식 정가 기준 Opus 5 대 Haiku 4.5는 5배, Fable 5 대 Haiku 4.5는 10배 차이다. "
+            "작업별로 라우팅하라 — 기계적 편집은 /model로 낮은 티어, 린트·포맷·리네임은 "
+            "애초에 모델이 필요 없다.",
         },
     },
     "H1-01": {
-        "token_est_per_hit": 10_000,
+        "token_est_per_hit": 0,
+        "measured": False,
         "en": {
-            "name": "Topic drift / marathon session",
-            "fix": "At ~35 min / ~50K tokens, /compact or /clear and start a fresh session.",
+            "name": "Topic drift (long session carrying a heavy context)",
+            "fix": "When the task changes, /clear. Name the session with /rename first "
+            "if you plan to come back via claude --resume.",
         },
         "ko": {
-            "name": "주제 드래그 / 장시간 세션",
-            "fix": "35분·50K 토큰 기준으로 /compact 또는 /clear + 새 세션 전환.",
+            "name": "주제 드래그 (무거운 컨텍스트를 끌고 가는 장시간 세션)",
+            "fix": "작업이 바뀌면 /clear. 돌아올 세션은 /rename으로 이름을 붙여두고 "
+            "claude --resume으로 복귀.",
         },
     },
     "H1-03": {
         "token_est_per_hit": 15_000,
+        "measured": True,
         "en": {
-            "name": "Compaction overrun (token pile-up)",
-            "fix": "Run /compact [focus] manually before you hit ~50K tokens.",
+            "name": "Context overrun (peak turn context past the ceiling)",
+            "fix": "Run /compact [focus] before the context passes ~50K. "
+            "Every later turn re-sends whatever you let pile up.",
         },
         "ko": {
-            "name": "compaction 버스 막차 (누적 토큰 과다)",
-            "fix": "50K 토큰 전에 수동 /compact [포커스 지시] 실행.",
+            "name": "컨텍스트 과적재 (한 턴 최대 컨텍스트가 상한 초과)",
+            "fix": "컨텍스트가 ~50K를 넘기 전에 /compact [포커스 지시] 실행. "
+            "쌓아둔 만큼이 이후 모든 턴에 다시 실린다.",
         },
     },
     "H8-01": {
         "token_est_per_hit": 5_000,
+        "measured": False,
         "en": {
             "name": "Main-thread exploration (many Reads in one turn)",
             "fix": 'Delegate exploration to a subagent: '
@@ -134,4 +172,9 @@ def info(pattern_id: str, lang: str) -> dict | None:
     if not entry:
         return None
     loc = entry.get(lang) or entry.get("en")
-    return {"name": loc["name"], "fix": loc["fix"], "token_est_per_hit": entry["token_est_per_hit"]}
+    return {
+        "name": loc["name"],
+        "fix": loc["fix"],
+        "token_est_per_hit": entry["token_est_per_hit"],
+        "measured": entry.get("measured", False),
+    }
