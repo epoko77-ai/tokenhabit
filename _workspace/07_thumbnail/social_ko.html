@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{ --cyan:#2dd4bf; --red:#fb5e7e; --amber:#f0b429; --bg0:#0a0e13; --bg1:#10161f; --bd:#222c38; --tx:#e8eef5; --mut:#8a98a8; }
+  html,body{ width:1200px; height:1200px; }
+  body{
+    font-family:'Pretendard',-apple-system,sans-serif;
+    background:
+      radial-gradient(820px 560px at 82% 10%, rgba(45,212,191,.11), transparent 60%),
+      radial-gradient(700px 620px at 6% 96%, rgba(251,94,126,.07), transparent 55%),
+      linear-gradient(150deg,var(--bg0),var(--bg1));
+    color:var(--tx); overflow:hidden; position:relative;
+  }
+  .grid{ position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+    background-size:44px 44px; mask-image:radial-gradient(900px 900px at 40% 35%,#000,transparent 82%); }
+  .wrap{ position:relative; height:100%; display:flex; flex-direction:column; padding:82px 76px 70px; }
+  .kicker{ font-family:'JetBrains Mono',monospace; font-size:17px; letter-spacing:.2em; text-transform:uppercase; color:var(--cyan); font-weight:500; display:flex; align-items:center; gap:12px; }
+  .kicker::before{ content:""; width:30px; height:2px; background:var(--cyan); display:inline-block; }
+  h1{ font-size:76px; font-weight:800; letter-spacing:-.035em; line-height:1.1; margin-top:30px; }
+  h1 .c{ color:var(--cyan); }
+  .lead{ font-size:25px; color:var(--mut); margin-top:24px; font-weight:500; line-height:1.5; max-width:900px; }
+
+  .table{ margin-top:58px; border:1px solid var(--bd); border-radius:18px; overflow:hidden; background:linear-gradient(180deg,#0e141c,#0b1016); box-shadow:0 40px 90px -34px rgba(0,0,0,.75); }
+  .head{ display:flex; padding:20px 30px; border-bottom:1px solid #1a232e; font-family:'JetBrains Mono',monospace; font-size:15.5px; letter-spacing:.06em; color:#61707f; }
+  .head .a{ flex:1.25; }
+  .head .b{ flex:1; }
+  .r{ display:flex; align-items:center; padding:34px 30px; border-bottom:1px solid #161e28; }
+  .r:last-child{ border-bottom:none; }
+  .r .a{ flex:1.25; font-size:25px; font-weight:600; color:#c3ced9; }
+  .r .a s{ color:#6b7887; text-decoration-color:var(--red); text-decoration-thickness:2px; }
+  .r .b{ flex:1; font-size:25px; font-weight:700; color:var(--cyan); display:flex; align-items:center; gap:13px; }
+  .r .b .ar{ color:#3d4a58; font-family:'JetBrains Mono',monospace; font-size:22px; }
+  .r.ok .b{ color:var(--cyan); }
+
+  .foot{ margin-top:auto; padding-top:64px; display:flex; align-items:flex-end; justify-content:space-between; }
+  .brand{ font-size:52px; font-weight:800; letter-spacing:-.03em; }
+  .brand .b{ color:var(--cyan); }
+  .brandsub{ font-size:17px; color:var(--mut); margin-top:9px; font-weight:500; }
+  .cmd{ font-family:'JetBrains Mono',monospace; font-size:21px; background:#0c1219; border:1px solid var(--bd); border-radius:12px; padding:15px 22px; color:#cdd9e5; }
+  .cmd .d{ color:var(--cyan); font-weight:700; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="wrap">
+    <div class="kicker">Claude Code · 토큰 진단</div>
+    <h1>절감 조언에는<br>출처 없는 <span class="c">숫자</span>가 붙는다</h1>
+    <div class="lead">방향은 맞는데 수치가 근거 없는 경우가 많다.<br>공급자 공식 문서로 확인되는 값은 이렇다.</div>
+
+    <div class="table">
+      <div class="head"><div class="a">떠도는 수치</div><div class="b">공식 문서</div></div>
+      <div class="r">
+        <div class="a"><s>AI 코딩 비용 90%가 낭비</s></div>
+        <div class="b"><span class="ar">→</span> 1차 출처 미확인</div>
+      </div>
+      <div class="r">
+        <div class="a"><s>최상위 모델 쓰면 30배</s></div>
+        <div class="b"><span class="ar">→</span> 5~10배</div>
+      </div>
+      <div class="r">
+        <div class="a"><s>배치로 70~90% 절감</s></div>
+        <div class="b"><span class="ar">→</span> 50%</div>
+      </div>
+      <div class="r ok">
+        <div class="a">프리픽스 바뀌면 캐시 무효</div>
+        <div class="b"><span class="ar">→</span> 사실 · 읽기 0.1x</div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div>
+        <div class="brand">token<span class="b">habit</span></div>
+        <div class="brandsub">Claude Code 토큰 낭비 습관 진단 · 9카테고리 31패턴</div>
+      </div>
+      <div class="cmd"><span class="d">$</span> uvx tokenhabit --lang ko</div>
+    </div>
+  </div>
+</body>
+</html>
