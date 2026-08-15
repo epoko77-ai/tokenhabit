@@ -34,17 +34,28 @@ python3 skill/scripts/habit_scan.py --json | jq .pattern_counts
 
 | 신호 | 감지 방법 | 카탈로그 ID | 낭비 계산 |
 |---|---|---|---|
-| 동일 파일 반복 Read | `Read` 의 `(file_path, offset, limit)` 중복 카운트 | H2-01 | 추정 (2,000/회) |
-| 대형 tool_result (≥8,000자), Bash 출처 | `tool_use_id` → 툴 이름 역추적 | H8-02 | **실측** |
-| 대형 tool_result (≥8,000자), Bash 외 | 위와 동일, Bash 아닌 것 | H2-02 | **실측** |
-| 한 턴 output_tokens > 2,000 | `message.usage.output_tokens` | H5-04 | 추정 (800/회) |
-| `message.model` 실제 변경 (5분 TTL 내) | 직전 메시지 모델과 비교 | H4-03 | **실측** (전환 직후 `cache_creation`) |
+| 동일 파일 반복 Read | `Read` 의 `(file_path, offset, limit)` 중복 카운트 | H2-01 | 추정 (상수 2,000/회) |
+| 대형 tool_result (≥8,000자), Bash 출처 | `tool_use_id` → 툴 이름 역추적 | H8-02 | **환산** (문자→토큰) |
+| 대형 tool_result (≥8,000자), Bash 외 | 위와 동일, Bash 아닌 것 | H2-02 | **환산** (문자→토큰) |
+| 한 턴 output_tokens > 2,000 | `message.usage.output_tokens` | H5-04 | 추정 (상수 800/회) |
+| `message.model` 실제 변경 (5분 TTL 내) | 직전 메시지 모델과 비교 | H4-03 | **실측** (전환 직후 `cache_creation` 카운터) |
 | 세션 assistant 메시지 ≥10건이 100% 최상위 티어 | `message.model` 분포 | H4-04 | 신호 (미합산) |
-| 한 턴 컨텍스트(`input+cache_read+cache_creation`) > 50K | 메시지별 최대값 | H1-03 | **실측** (초과분) |
+| 한 턴 컨텍스트(`input+cache_read+cache_creation`) > 50K | 메시지별 최대값 | H1-03 | **실측** (usage 카운터 초과분) |
 | 세션 >35분 **그리고** 최대 컨텍스트 >50K | wall-time + 위 컨텍스트 | H1-01 | 신호 (미합산) |
-| 한 턴 내 Read ≥4개 | `message.id` 로 묶은 Read 개수 | H8-01 | 추정 (5,000/회) |
+| 한 턴 내 Read ≥4개 | `message.id` 로 묶은 Read 개수 | H8-01 | 추정 (상수 5,000/회) |
 | 세션당 서브에이전트 스폰 ≥6 | `Agent`(현행) 또는 `Task`(구버전) | H8-03 | 신호 (미합산) |
 | WebFetch/WebSearch 호출 수 | tool_use 이름 | H2-04 | 신호 (미합산) |
+
+**증거 등급 — 낭비 수치는 셋 중 하나이며 절대 뭉뚱그리지 않는다:**
+
+| 등급 | 뜻 | 해당 패턴 |
+|---|---|---|
+| **실측(observed)** | 로그의 토큰 카운터 그대로 | H4-03, H1-03 |
+| **환산(estimated)** | 실제 내용이지만 문자 수를 토큰으로 환산 (영문 4자/한글 2자) | H2-02, H8-02 |
+| **추정(heuristic)** | 시나리오 상수 × 횟수 | H2-01, H5-04, H8-01 |
+| 신호(signal) | 세지만 점수 미합산 | H1-01, H2-04, H4-04, H8-03 |
+
+> ⚠️ v1.3.0은 H2-02·H8-02를 "실측"으로 표기했으나 실제로는 문자 환산이었다. 남의 출처 없는 수치를 지적하면서 자기 헤드라인 숫자의 근거를 잘못 말한 것이다. v1.3.1에서 등급을 셋으로 분리했다.
 
 **측정 규약 — 이 4가지를 어기면 숫자가 거짓말을 한다:**
 

@@ -5,6 +5,35 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.1] — 2026-08-16
+
+**A labelling correction. Two patterns claimed their numbers came from the log's
+token counters when they came from a character conversion.**
+
+### Fixed
+
+- **H2-02 and H8-02 were labelled "measured".** Their waste is computed by
+  `_est_tokens()` — characters converted at 4/token (English) and 2/token
+  (Korean) — not by any token counter in the log. Calling that a measurement
+  was exactly the failure this project criticises in others: a confident number
+  whose stated basis is wrong.
+
+### Changed
+
+Waste is now graded in three, and the report says which one it is:
+
+| Grade | Meaning | Patterns |
+|---|---|---|
+| **observed** | the log's own token counters | H4-03, H1-03 |
+| **estimated** | real content, characters converted to tokens | H2-02, H8-02 |
+| **heuristic** | a scenario constant x hit count | H2-01, H5-04, H8-01 |
+| signal | counted, never scored | H1-01, H2-04, H4-04, H8-03 |
+
+Totals are unchanged — only the claim about where they come from is. If you ran
+1.3.0, your numbers are the same; two of them were described wrongly.
+
+---
+
 ## [1.3.0] — 2026-08-15
 
 **A correctness release. If you have run tokenhabit before, your score will change — see
@@ -144,6 +173,7 @@ same version and the same `--days` window.
 
 - Claude Code skill: catalog, measurement adapter, runtime hook.
 
+[1.3.1]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.3.1
 [1.3.0]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.3.0
 [1.2.1]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.2.1
 [1.2.0]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.2.0

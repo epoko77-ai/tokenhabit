@@ -19,9 +19,11 @@ _USE_COLOR = sys.stdout.isatty() and os.environ.get("NO_COLOR") is None
 # rather than with habits.
 SIGNAL_PATTERNS = {"H2-04", "H8-03", "H4-04", "H1-01"}
 
-# Patterns whose waste comes from a measured token field in the log rather than
-# from a scenario constant. Keyed to the "<id>_tokens" entry in pattern_counts.
-MEASURED_TOKEN_KEYS = {
+# Patterns whose waste is summed from a per-hit token total rather than from a
+# scenario constant. The catalog's `evidence` grade says how that total was
+# obtained — "observed" (log counter) vs "estimated" (character conversion).
+# Never label a character conversion as a measurement.
+PER_HIT_TOKEN_KEYS = {
     "H2-02": "H2-02_tokens",
     "H8-02": "H8-02_tokens",
     "H4-03": "H4-03_tokens",
@@ -77,14 +79,17 @@ STR = {
         "score_line": "{grade}  —  ~{pct:.0f}% of your tokens were likely wasted ({waste:,} tok)",
         "clean": "No wasteful habits detected. Nice — you're driving clean.",
         "detected": "[Detected habits]  (by catalog ID, most frequent first)",
-        "waste_measured": "  measured waste: {waste:,} tokens (from logged token counts)",
-        "waste_est": "  est. waste: ~{waste:,} tokens (scenario constant x hits)",
+        "waste_observed": "  observed waste: {waste:,} tokens (from the log's own token counters)",
+        "waste_estimated": "  estimated waste: ~{waste:,} tokens (real content, chars converted to tokens)",
+        "waste_heuristic": "  heuristic waste: ~{waste:,} tokens (scenario constant x hits)",
         "signal_per": "  frequency signal — not scored ({count}; check context)",
         "fix": "  fix: ",
         "total_waste": "  Total waste: ~{waste:,} tokens",
         "share": "Share: I was wasting ~{pct:.0f}% of my Claude Code tokens. Top leak: {top}. — tokenhabit",
         "notes": [
             "  * Numbers are trend-spotting approximations, not exact billing.",
+            "  * Waste is graded: observed = the log's token counters; estimated =",
+            "    real content with characters converted to tokens; heuristic = a constant.",
             "  * A turn is one message id, so parallel tool calls count as one turn.",
             "    Context size = input + cache_read + cache_creation of a single turn.",
             "  * H8-01 = sessions with >=4 Reads piled into a single turn (heuristic).",
@@ -105,14 +110,17 @@ STR = {
         "score_line": "{grade}  —  토큰의 약 {pct:.0f}%가 습관적으로 낭비됨 ({waste:,} tok)",
         "clean": "감지된 낭비 습관 없음. 잘 하고 있습니다!",
         "detected": "[감지된 습관 패턴]  (카탈로그 ID, 빈도 내림차순)",
-        "waste_measured": "  실측 낭비: {waste:,} 토큰 (로그의 실제 토큰 수)",
-        "waste_est": "  추정 낭비: ~{waste:,} 토큰 (시나리오 상수 × 횟수)",
+        "waste_observed": "  실측 낭비: {waste:,} 토큰 (로그의 토큰 카운터 그대로)",
+        "waste_estimated": "  환산 낭비: ~{waste:,} 토큰 (실제 내용의 문자 수를 토큰으로 환산)",
+        "waste_heuristic": "  추정 낭비: ~{waste:,} 토큰 (시나리오 상수 × 횟수)",
         "signal_per": "  빈도 신호 — 점수 미반영 ({count}; 맥락으로 판단)",
         "fix": "  즉시 fix: ",
         "total_waste": "  총 낭비: ~{waste:,} 토큰",
         "share": "공유: 내 Claude Code 토큰의 약 {pct:.0f}%를 낭비하고 있었다. 1위 누수: {top}. — tokenhabit",
         "notes": [
             "  * 수치는 경향 파악용 근사치이며 정확한 과금이 아닙니다.",
+            "  * 낭비 등급: 실측 = 로그의 토큰 카운터, 환산 = 실제 내용의 문자→토큰 변환,",
+            "    추정 = 시나리오 상수 × 횟수. 셋을 뭉뚱그려 말하지 마세요.",
             "  * 한 턴 = message id 하나. 병렬 툴 호출은 한 턴으로 셉니다.",
             "    컨텍스트 크기 = 한 턴의 input + cache_read + cache_creation.",
             "  * H8-01 = 한 턴에 Read 4개 이상 몰아 읽은 세션 수 (근사).",
@@ -176,24 +184,22 @@ def render(
     sorted_patterns = sorted(detected.items(), key=lambda x: x[1], reverse=True)
 
     total_waste = 0
-    # (id, count, waste, fix, is_signal, is_measured)
-    pattern_lines: list[tuple[str, int, int, str, bool, bool]] = []
+    # (id, count, waste, fix, is_signal, evidence)
+    pattern_lines: list[tuple[str, int, int, str, bool, str]] = []
     scored: list[tuple[int, str]] = []
     for pid, count in sorted_patterns:
         ci = catalog_info(pid, lang)
         if not ci:
             continue
         is_signal = pid in SIGNAL_PATTERNS
-        is_measured = False
         waste = ci["token_est_per_hit"] * count
-        token_key = MEASURED_TOKEN_KEYS.get(pid)
+        token_key = PER_HIT_TOKEN_KEYS.get(pid)
         if token_key:
             waste = counts.get(token_key, 0)
-            is_measured = True
         if not is_signal:
             total_waste += waste
             scored.append((waste, ci["name"]))
-        pattern_lines.append((pid, count, waste, ci["fix"], is_signal, is_measured))
+        pattern_lines.append((pid, count, waste, ci["fix"], is_signal, ci["evidence"]))
 
     # Headline names the biggest leak by tokens, not by hit count.
     top_name = max(scored)[1] if scored else ""
@@ -220,16 +226,14 @@ def render(
     print()
     print(bold(s["detected"]))
     print(dim("─" * 64))
-    for pid, count, waste, fix, is_signal, is_measured in pattern_lines:
+    for pid, count, waste, fix, is_signal, evidence in pattern_lines:
         ci = catalog_info(pid, lang)
         print()
         print(yellow(f"  [{pid}] ") + bold(ci["name"]) + dim(f"  ×{count}"))
         if is_signal:
             print(dim(s["signal_per"].format(count=count)))
-        elif is_measured:
-            print(s["waste_measured"].format(waste=waste))
         else:
-            print(s["waste_est"].format(waste=waste))
+            print(s[f"waste_{evidence}"].format(waste=waste))
         print(dim(s["fix"]) + fix)
 
     print()

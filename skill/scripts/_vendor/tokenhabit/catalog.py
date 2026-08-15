@@ -5,10 +5,14 @@ localized name and a copy-pasteable fix. These IDs map back to the 31-pattern
 habit catalog in the Claude Code skill; only the subset that is quantitatively
 auto-detectable from JSONL logs lives here.
 
-`measured: True` means the reported waste comes from token counts the log
-actually recorded (tool-result size, cache_creation burned by a model switch,
-context carried past the ceiling). `measured: False` means the waste is a
-scenario constant multiplied by a hit count — directional, not billing.
+`evidence` says where a waste number came from. Never blur these:
+
+  "observed"  — a token counter the log actually recorded (usage fields).
+  "estimated" — derived from real content, but converted, not counted
+                (character->token conversion of a tool result).
+  "heuristic" — a scenario constant multiplied by a hit count.
+
+Patterns listed in report.SIGNAL_PATTERNS are counted but never scored.
 """
 
 from __future__ import annotations
@@ -16,7 +20,7 @@ from __future__ import annotations
 CATALOG: dict[str, dict] = {
     "H2-01": {
         "token_est_per_hit": 2_000,
-        "measured": False,
+        "evidence": "heuristic",
         "en": {
             "name": "Re-reading the same file",
             "fix": 'Reference what you already read ("from the X you read earlier...") '
@@ -29,7 +33,7 @@ CATALOG: dict[str, dict] = {
     },
     "H2-02": {
         "token_est_per_hit": 5_000,
-        "measured": True,
+        "evidence": "estimated",
         "en": {
             "name": "Oversized tool results pulled into context",
             "fix": "Narrow the request before you make it: read a line range, grep first, "
@@ -42,7 +46,7 @@ CATALOG: dict[str, dict] = {
     },
     "H8-02": {
         "token_est_per_hit": 5_000,
-        "measured": True,
+        "evidence": "estimated",
         "en": {
             "name": "stdout flood (large Bash output)",
             "fix": "Add | head -50 or a grep filter to Bash commands. "
@@ -55,7 +59,7 @@ CATALOG: dict[str, dict] = {
     },
     "H2-04": {
         "token_est_per_hit": 2_000,
-        "measured": False,
+        "evidence": "heuristic",
         "en": {
             "name": "Stranded web results (WebFetch/WebSearch)",
             "fix": "Delegate research to a subagent so only the summary returns. "
@@ -68,7 +72,7 @@ CATALOG: dict[str, dict] = {
     },
     "H8-03": {
         "token_est_per_hit": 8_000,
-        "measured": False,
+        "evidence": "heuristic",
         "en": {
             "name": "Subagent overuse (many spawns in one session)",
             "fix": "Delegate only exploration / large independent / parallelizable work. "
@@ -81,7 +85,7 @@ CATALOG: dict[str, dict] = {
     },
     "H5-04": {
         "token_est_per_hit": 800,
-        "measured": False,
+        "evidence": "heuristic",
         "en": {
             "name": "Inviting verbose output",
             "fix": 'Cap the output: "in 2 lines", "no code or examples". '
@@ -94,7 +98,7 @@ CATALOG: dict[str, dict] = {
     },
     "H4-03": {
         "token_est_per_hit": 21_000,
-        "measured": True,
+        "evidence": "observed",
         "en": {
             "name": "Cache-kill switch (model swapped mid-session)",
             "fix": "Switching model mid-session voids the prompt cache — the whole prefix is "
@@ -109,7 +113,7 @@ CATALOG: dict[str, dict] = {
     },
     "H4-04": {
         "token_est_per_hit": 0,
-        "measured": False,
+        "evidence": "heuristic",
         "en": {
             "name": "Top-tier-only driving (never switched models)",
             "fix": "Official list prices differ 5x (Opus 5 vs Haiku 4.5) to 10x "
@@ -125,7 +129,7 @@ CATALOG: dict[str, dict] = {
     },
     "H1-01": {
         "token_est_per_hit": 0,
-        "measured": False,
+        "evidence": "heuristic",
         "en": {
             "name": "Topic drift (long session carrying a heavy context)",
             "fix": "When the task changes, /clear. Name the session with /rename first "
@@ -139,7 +143,7 @@ CATALOG: dict[str, dict] = {
     },
     "H1-03": {
         "token_est_per_hit": 15_000,
-        "measured": True,
+        "evidence": "observed",
         "en": {
             "name": "Context overrun (peak turn context past the ceiling)",
             "fix": "Run /compact [focus] before the context passes ~50K. "
@@ -153,7 +157,7 @@ CATALOG: dict[str, dict] = {
     },
     "H8-01": {
         "token_est_per_hit": 5_000,
-        "measured": False,
+        "evidence": "heuristic",
         "en": {
             "name": "Main-thread exploration (many Reads in one turn)",
             "fix": 'Delegate exploration to a subagent: '
@@ -176,5 +180,5 @@ def info(pattern_id: str, lang: str) -> dict | None:
         "name": loc["name"],
         "fix": loc["fix"],
         "token_est_per_hit": entry["token_est_per_hit"],
-        "measured": entry.get("measured", False),
+        "evidence": entry.get("evidence", "heuristic"),
     }
