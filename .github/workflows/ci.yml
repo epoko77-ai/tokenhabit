@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Vendor copy is in sync with tokenhabit/
+        run: python3 skill/scripts/sync_vendor.py --check
+
+      - name: Import + CLI smoke test
+        run: |
+          python3 -c "import tokenhabit.scan, tokenhabit.catalog, tokenhabit.report, tokenhabit.cli"
+          python3 -m tokenhabit.cli --version
+          python3 -m tokenhabit.cli --help > /dev/null
+
+      - name: Skill entrypoint smoke test
+        run: |
+          python3 skill/scripts/habit_scan.py --help > /dev/null
+          python3 skill/scripts/hook_check.py self-test
+
+      - name: Detector regression on a synthetic session
+        run: python3 tests/test_detectors.py
