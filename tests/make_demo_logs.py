@@ -36,33 +36,40 @@ def ts(minute: int) -> str:
 
 
 def build_session(path: Path, *, turns: int, model: str, seed_shift: int) -> None:
+    """One synthetic session with a believable mix of habits.
+
+    Tuned so the report lands in the range real sessions actually produce
+    (roughly C–D, 15–30% waste). An inflated demo would misrepresent the tool.
+    """
     lines: list[dict] = []
-    cache = 4_000
+    cache = 6_000
     for t in range(turns):
         mid = f"msg_{seed_shift}_{t}"
-        cache = min(cache + 1_800 + rnd(2_400), 120_000)
-        out = 200 + rnd(2_600)
+        cache = min(cache + 2_000 + rnd(2_600), 88_000)
+        out = 400 + rnd(2_200)
         content: list[dict] = []
 
-        # Some turns sweep the repo with parallel Reads (H8-01) — separate lines,
-        # shared message id, exactly like real Claude Code logs.
-        if t % 9 == 4:
+        # Occasional repo sweep with parallel Reads (H8-01) — separate lines,
+        # shared message id, exactly like real Claude Code logs. Each sweep hits a
+        # different slice of the tree, so these are sweeps, not re-reads.
+        if t % 14 == 5:
+            base = (t // 14) * 5
             for i in range(5):
                 lines.append({
                     "type": "assistant", "timestamp": ts(t * 2),
                     "message": {"id": mid, "role": "assistant", "model": model,
                                 "content": [{"type": "tool_use", "id": f"r{seed_shift}{t}{i}",
                                              "name": "Read",
-                                             "input": {"file_path": f"/src/mod{i}.ts"}}]},
+                                             "input": {"file_path": f"/src/mod{base + i}.ts"}}]},
                 })
 
-        # Re-reading the same file (H2-01)
-        if t % 11 == 3:
+        # Going back to the same file instead of using what is already in context (H2-01)
+        if t % 12 == 3:
             content.append({"type": "tool_use", "id": f"rr{seed_shift}{t}", "name": "Read",
                             "input": {"file_path": "/src/auth.ts"}})
 
         # Unfiltered build output (H8-02)
-        if t % 13 == 6:
+        if t % 17 == 6:
             content.append({"type": "tool_use", "id": f"b{seed_shift}{t}", "name": "Bash",
                             "input": {"command": "npm test"}})
 
@@ -70,10 +77,10 @@ def build_session(path: Path, *, turns: int, model: str, seed_shift: int) -> Non
             "type": "assistant", "timestamp": ts(t * 2),
             "message": {"id": mid, "role": "assistant", "model": model,
                         "content": content,
-                        "usage": {"input_tokens": 120 + rnd(400),
+                        "usage": {"input_tokens": 300 + rnd(900),
                                   "output_tokens": out,
                                   "cache_read_input_tokens": cache,
-                                  "cache_creation_input_tokens": 900 + rnd(1_500)}},
+                                  "cache_creation_input_tokens": 2_600 + rnd(3_400)}},
         })
 
         if t % 13 == 6:
