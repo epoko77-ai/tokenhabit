@@ -6,7 +6,7 @@ const path = require('path');
 
 const TARGETS = [
   { file: 'social_ko.html',      out: 'social_ko_square.png', w: 1200, h: 1200 },
-  { file: 'social_ko_wide.html', out: 'social_ko_wide.png',   w: 1200, h: 630  },
+  { file: 'social_ko_wide.html', out: 'social_ko_wide.png',   w: 1280, h: 640  },
 ];
 
 (async () => {
