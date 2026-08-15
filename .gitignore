@@ -5,3 +5,10 @@ dist/
 build/
 *.egg-info/
 .venv/
+
+# 빌드 부산물 — 썸네일 생성 도구(_workspace/07_thumbnail)의 의존성.
+# 1.2.x sdist 가 playwright-core 를 PyPI 로 실어 보낸 원인이었다.
+node_modules/
+
+# Claude Code 로컬 설정(로컬 절대경로 포함)
+.claude/settings.local.json
