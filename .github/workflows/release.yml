@@ -1,0 +1,74 @@
+name: release
+
+# Publishes to PyPI via Trusted Publishing (OIDC) — no API token is stored
+# anywhere, not in this repo's secrets and not on a laptop. GitHub proves the
+# workflow's identity to PyPI at run time.
+#
+# One-time setup on PyPI (Your projects → tokenhabit → Publishing):
+#   Owner:            epoko77-ai
+#   Repository:       tokenhabit
+#   Workflow name:    release.yml
+#   Environment:      pypi
+#
+# After that, publishing a release is: push a v* tag (or run this manually).
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Verify before building
+        run: |
+          python3 skill/scripts/sync_vendor.py --check
+          python3 tests/test_detectors.py
+
+      - name: Build
+        run: pipx run build
+
+      - name: Reject a bloated sdist
+        # 1.2.x shipped node_modules/ and local settings to PyPI because the
+        # hatchling config table was misnamed and silently ignored. Fail loudly
+        # rather than let that happen again.
+        run: |
+          sdist=$(ls dist/*.tar.gz)
+          size=$(wc -c < "$sdist")
+          echo "sdist: $sdist ($size bytes)"
+          if [ "$size" -gt 500000 ]; then
+            echo "::error::sdist is ${size} bytes (>500KB) — check the sdist allowlist in pyproject.toml"
+            tar -tzf "$sdist" | head -50
+            exit 1
+          fi
+          if tar -tzf "$sdist" | grep -Eq "node_modules|\.claude/|_workspace"; then
+            echo "::error::sdist contains files that must never be published"
+            tar -tzf "$sdist" | grep -E "node_modules|\.claude/|_workspace" | head -20
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # required for Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
