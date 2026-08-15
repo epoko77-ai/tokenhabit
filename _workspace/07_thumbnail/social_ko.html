@@ -11,74 +11,89 @@
   body{
     font-family:'Pretendard',-apple-system,sans-serif;
     background:
-      radial-gradient(820px 560px at 82% 10%, rgba(45,212,191,.11), transparent 60%),
-      radial-gradient(700px 620px at 6% 96%, rgba(251,94,126,.07), transparent 55%),
+      radial-gradient(820px 560px at 82% 8%, rgba(45,212,191,.11), transparent 60%),
+      radial-gradient(680px 600px at 4% 98%, rgba(251,94,126,.06), transparent 55%),
       linear-gradient(150deg,var(--bg0),var(--bg1));
     color:var(--tx); overflow:hidden; position:relative;
   }
   .grid{ position:absolute; inset:0;
-    background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
-    background-size:44px 44px; mask-image:radial-gradient(900px 900px at 40% 35%,#000,transparent 82%); }
-  .wrap{ position:relative; height:100%; display:flex; flex-direction:column; padding:82px 76px 70px; }
-  .kicker{ font-family:'JetBrains Mono',monospace; font-size:17px; letter-spacing:.2em; text-transform:uppercase; color:var(--cyan); font-weight:500; display:flex; align-items:center; gap:12px; }
-  .kicker::before{ content:""; width:30px; height:2px; background:var(--cyan); display:inline-block; }
-  h1{ font-size:76px; font-weight:800; letter-spacing:-.035em; line-height:1.1; margin-top:30px; }
-  h1 .c{ color:var(--cyan); }
-  .lead{ font-size:25px; color:var(--mut); margin-top:24px; font-weight:500; line-height:1.5; max-width:900px; }
+    background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+    background-size:44px 44px; mask-image:radial-gradient(900px 900px at 40% 38%,#000,transparent 84%); }
+  .wrap{ position:relative; height:100%; display:flex; flex-direction:column; padding:72px 68px 62px; }
 
-  .table{ margin-top:58px; border:1px solid var(--bd); border-radius:18px; overflow:hidden; background:linear-gradient(180deg,#0e141c,#0b1016); box-shadow:0 40px 90px -34px rgba(0,0,0,.75); }
-  .head{ display:flex; padding:20px 30px; border-bottom:1px solid #1a232e; font-family:'JetBrains Mono',monospace; font-size:15.5px; letter-spacing:.06em; color:#61707f; }
-  .head .a{ flex:1.25; }
-  .head .b{ flex:1; }
-  .r{ display:flex; align-items:center; padding:34px 30px; border-bottom:1px solid #161e28; }
-  .r:last-child{ border-bottom:none; }
-  .r .a{ flex:1.25; font-size:25px; font-weight:600; color:#c3ced9; }
-  .r .a s{ color:#6b7887; text-decoration-color:var(--red); text-decoration-thickness:2px; }
-  .r .b{ flex:1; font-size:25px; font-weight:700; color:var(--cyan); display:flex; align-items:center; gap:13px; }
-  .r .b .ar{ color:#3d4a58; font-family:'JetBrains Mono',monospace; font-size:22px; }
-  .r.ok .b{ color:var(--cyan); }
-
-  .foot{ margin-top:auto; padding-top:64px; display:flex; align-items:flex-end; justify-content:space-between; }
-  .brand{ font-size:52px; font-weight:800; letter-spacing:-.03em; }
+  .kicker{ font-family:'JetBrains Mono',monospace; font-size:16px; letter-spacing:.2em; text-transform:uppercase; color:var(--cyan); font-weight:500; display:flex; align-items:center; gap:12px; }
+  .kicker::before{ content:""; width:28px; height:2px; background:var(--cyan); display:inline-block; }
+  .brand{ font-size:96px; font-weight:800; letter-spacing:-.035em; margin-top:22px; line-height:1; }
   .brand .b{ color:var(--cyan); }
-  .brandsub{ font-size:17px; color:var(--mut); margin-top:9px; font-weight:500; }
-  .cmd{ font-family:'JetBrains Mono',monospace; font-size:21px; background:#0c1219; border:1px solid var(--bd); border-radius:12px; padding:15px 22px; color:#cdd9e5; }
+  h1{ font-size:43px; font-weight:700; line-height:1.36; margin-top:34px; letter-spacing:-.014em; color:#f4f8fc; }
+  h1 em{ font-style:normal; color:var(--cyan); }
+
+  .term{ margin-top:50px; background:linear-gradient(180deg,#0e141c,#0b1016); border:1px solid var(--bd); border-radius:16px; box-shadow:0 36px 80px -32px rgba(0,0,0,.78); overflow:hidden; }
+  .bar{ display:flex; gap:8px; padding:15px 20px; border-bottom:1px solid #1a232e; align-items:center; }
+  .bar i{ width:11px; height:11px; border-radius:50%; display:inline-block; }
+  .bar .t{ margin-left:11px; font-family:'JetBrains Mono',monospace; font-size:13px; color:#5e6b7a; }
+  .body{ padding:34px 30px; font-family:'JetBrains Mono',monospace; font-size:17.5px; line-height:2.0; }
+  .body .ko{ font-family:'Pretendard',sans-serif; }
+  .score{ font-size:23px; font-weight:700; }
+  .score .g{ color:var(--amber); }
+  .row{ color:#aab6c4; display:flex; align-items:baseline; gap:10px; }
+  .row .id{ color:var(--red); font-weight:700; }
+  .row.cy .id{ color:var(--cyan); }
+  .row .x{ color:#5e6b7a; margin-left:auto; }
+  .fix{ color:#6f7d8c; font-size:15.5px; padding-left:3px; }
+  .fix b{ color:var(--cyan); font-weight:500; }
+  .hr{ height:1px; background:#18212c; margin:17px 0; }
+
+  .steps{ display:flex; gap:14px; margin-top:44px; }
+  .st{ flex:1; background:#0d131b; border:1px solid var(--bd); border-radius:13px; padding:24px 20px; }
+  .st .n{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--cyan); letter-spacing:.1em; }
+  .st .t{ font-size:21px; font-weight:700; margin-top:6px; color:#dce6f0; }
+  .st .d{ font-size:15.5px; color:var(--mut); margin-top:4px; line-height:1.45; }
+
+  .foot{ margin-top:auto; padding-top:46px; display:flex; align-items:flex-end; justify-content:space-between; }
+  .cmd{ display:inline-flex; gap:12px; font-family:'JetBrains Mono',monospace; font-size:22px; background:#0c1219; border:1px solid var(--bd); border-radius:12px; padding:15px 22px; color:#cdd9e5; }
   .cmd .d{ color:var(--cyan); font-weight:700; }
+  .meta{ display:flex; gap:16px; font-size:15px; color:var(--mut); font-weight:500; padding-bottom:6px; }
+  .meta span{ display:flex; align-items:center; gap:7px; }
+  .dot{ width:6px; height:6px; border-radius:50%; background:var(--cyan); }
 </style>
 </head>
 <body>
   <div class="grid"></div>
   <div class="wrap">
-    <div class="kicker">Claude Code · 토큰 진단</div>
-    <h1>절감 조언에는<br>출처 없는 <span class="c">숫자</span>가 붙는다</h1>
-    <div class="lead">방향은 맞는데 수치가 근거 없는 경우가 많다.<br>공급자 공식 문서로 확인되는 값은 이렇다.</div>
+    <div class="kicker">Claude Code · 토큰 진단 CLI</div>
+    <div class="brand">token<span class="b">habit</span></div>
+    <h1>Claude Code 토큰이 <em>어디서 새는지</em><br>내 로그를 읽어서 알려줍니다.</h1>
 
-    <div class="table">
-      <div class="head"><div class="a">떠도는 수치</div><div class="b">공식 문서</div></div>
-      <div class="r">
-        <div class="a"><s>AI 코딩 비용 90%가 낭비</s></div>
-        <div class="b"><span class="ar">→</span> 1차 출처 미확인</div>
-      </div>
-      <div class="r">
-        <div class="a"><s>최상위 모델 쓰면 30배</s></div>
-        <div class="b"><span class="ar">→</span> 5~10배</div>
-      </div>
-      <div class="r">
-        <div class="a"><s>배치로 70~90% 절감</s></div>
-        <div class="b"><span class="ar">→</span> 50%</div>
-      </div>
-      <div class="r ok">
-        <div class="a">프리픽스 바뀌면 캐시 무효</div>
-        <div class="b"><span class="ar">→</span> 사실 · 읽기 0.1x</div>
+    <div class="term">
+      <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">tokenhabit — 습관 진단</span></div>
+      <div class="body">
+        <div class="score ko">토큰 낭비 점수: <span class="g">D</span> — 약 25% 낭비</div>
+        <div class="hr"></div>
+        <div class="row"><span class="id">[H1-03]</span> <span class="ko">컨텍스트 과적재</span> <span class="x">270,006 tok</span></div>
+        <div class="fix ko">→ 50K 넘기 전에 <b>/compact</b></div>
+        <div class="row"><span class="id">[H2-02]</span> <span class="ko">대형 툴 결과 적재</span> <span class="x">136,942 tok</span></div>
+        <div class="fix ko">→ 요청 전에 범위를 좁혀라</div>
+        <div class="row"><span class="id">[H2-01]</span> <span class="ko">파일 리드 재탕</span> <span class="x">×27</span></div>
+        <div class="fix ko">→ 재읽기 대신 컨텍스트 참조</div>
+        <div class="row cy"><span class="id">[H4-04]</span> <span class="ko">최상위 모델 고정</span> <span class="x">신호</span></div>
+        <div class="fix ko">→ 작업별로 <b>/model</b> 라우팅</div>
       </div>
     </div>
 
+    <div class="steps">
+      <div class="st"><div class="n">01</div><div class="t">스캔</div><div class="d">로컬 세션 로그<br>LLM 호출 없이</div></div>
+      <div class="st"><div class="n">02</div><div class="t">진단</div><div class="d">낭비 점수 A~F<br>습관 순위</div></div>
+      <div class="st"><div class="n">03</div><div class="t">처방</div><div class="d">습관마다<br>복붙 커맨드</div></div>
+    </div>
+
     <div class="foot">
-      <div>
-        <div class="brand">token<span class="b">habit</span></div>
-        <div class="brandsub">Claude Code 토큰 낭비 습관 진단 · 9카테고리 31패턴</div>
-      </div>
       <div class="cmd"><span class="d">$</span> uvx tokenhabit --lang ko</div>
+      <div class="meta">
+        <span><i class="dot"></i>설치 불필요</span>
+        <span><i class="dot"></i>의존성 0</span>
+        <span><i class="dot"></i>오프라인</span>
+      </div>
     </div>
   </div>
 </body>
