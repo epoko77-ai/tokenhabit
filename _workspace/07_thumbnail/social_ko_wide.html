@@ -6,107 +6,73 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{ --cyan:#2dd4bf; --red:#fb5e7e; --amber:#f0b429; --bg0:#0a0e13; --bg1:#10161f; --bd:#222c38; --tx:#e8eef5; --mut:#8a98a8; }
+  :root{ --cyan:#2dd4bf; --red:#fb5e7e; --bg0:#0a0e13; --bg1:#10161f; --bd:#232e3b; --tx:#e8eef5; --mut:#94a2b2; }
   html,body{ width:1280px; height:640px; }
   body{
     font-family:'Pretendard',-apple-system,sans-serif;
     background:
-      radial-gradient(780px 480px at 82% 14%, rgba(45,212,191,.11), transparent 60%),
-      radial-gradient(600px 500px at 4% 96%, rgba(251,94,126,.06), transparent 55%),
+      radial-gradient(820px 520px at 76% 6%, rgba(45,212,191,.13), transparent 62%),
+      radial-gradient(620px 520px at 2% 100%, rgba(251,94,126,.06), transparent 55%),
       linear-gradient(150deg,var(--bg0),var(--bg1));
     color:var(--tx); overflow:hidden; position:relative;
   }
   .grid{ position:absolute; inset:0;
-    background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
-    background-size:40px 40px; mask-image:radial-gradient(900px 640px at 32% 42%,#000,transparent 82%); }
-  .wrap{ position:relative; height:100%; display:flex; gap:44px; padding:50px 58px 44px; }
-  .left{ flex:1.06; display:flex; flex-direction:column; }
+    background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+    background-size:44px 44px; mask-image:radial-gradient(900px 640px at 36% 42%,#000,transparent 84%); }
+  .wrap{ position:relative; height:100%; display:flex; flex-direction:column; padding:48px 62px 44px; }
 
-  .kicker{ font-family:'JetBrains Mono',monospace; font-size:13.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--cyan); font-weight:500; display:flex; align-items:center; gap:10px; }
-  .kicker::before{ content:""; width:24px; height:2px; background:var(--cyan); display:inline-block; }
-  .brand{ font-size:60px; font-weight:800; letter-spacing:-.035em; margin-top:18px; line-height:1; }
+  .top{ display:flex; align-items:center; justify-content:space-between; }
+  .brand{ font-size:38px; font-weight:800; letter-spacing:-.035em; line-height:1; }
   .brand .b{ color:var(--cyan); }
-  h1{ font-size:29px; font-weight:700; line-height:1.38; margin-top:20px; letter-spacing:-.012em; color:#f4f8fc; }
-  h1 em{ font-style:normal; color:var(--cyan); }
+  .kicker{ font-family:'JetBrains Mono',monospace; font-size:14px; letter-spacing:.16em; text-transform:uppercase; color:#6c7b8b; font-weight:500; }
 
-  .steps{ display:flex; gap:10px; margin-top:26px; }
-  .st{ flex:1; background:#0d131b; border:1px solid var(--bd); border-radius:11px; padding:13px 14px; }
-  .st .n{ font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--cyan); letter-spacing:.1em; }
-  .st .t{ font-size:15px; font-weight:700; margin-top:5px; color:#dce6f0; }
-  .st .d{ font-size:12.5px; color:var(--mut); margin-top:3px; line-height:1.4; }
+  .mid{ margin-top:40px; display:flex; gap:52px; align-items:center; }
+  .hero{ flex:1.05; }
+  .hl{ font-size:29px; font-weight:700; letter-spacing:-.02em; color:#cfdae6; line-height:1.25; display:flex; align-items:center; gap:14px; }
+  .tagx{ font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; letter-spacing:.08em; color:#6c7b8b; border:1px solid var(--bd); border-radius:999px; padding:5px 12px; }
+  .big{ display:flex; align-items:baseline; gap:16px; margin-top:4px; }
+  .big .n{ font-size:158px; font-weight:800; letter-spacing:-.05em; color:var(--cyan); line-height:.94; }
+  .big .t{ font-size:38px; font-weight:800; letter-spacing:-.02em; color:#f2f7fb; }
+  .lead{ font-size:20px; color:var(--mut); margin-top:22px; font-weight:500; line-height:1.5; }
 
-  .foot{ margin-top:auto; }
-  .cmd{ display:inline-flex; gap:11px; font-family:'JetBrains Mono',monospace; font-size:19px; background:#0c1219; border:1px solid var(--bd); border-radius:11px; padding:13px 19px; color:#cdd9e5; }
+  .chips{ flex:1; display:flex; flex-direction:column; gap:11px; }
+  .chip{ display:flex; align-items:center; gap:14px; background:#0e151e; border:1px solid var(--bd); border-radius:12px; padding:17px 20px; }
+  .chip .k{ font-size:19px; font-weight:700; color:#e2eaf3; }
+  .chip .ar{ font-family:'JetBrains Mono',monospace; font-size:16px; color:#41505f; margin-left:auto; }
+  .chip .v{ font-size:18px; font-weight:600; color:var(--cyan); font-family:'JetBrains Mono',monospace; }
+  .chip .v.ko{ font-family:'Pretendard',sans-serif; font-weight:600; }
+
+  .foot{ margin-top:auto; padding-top:34px; display:flex; align-items:center; justify-content:space-between; }
+  .cmd{ display:inline-flex; gap:11px; font-family:'JetBrains Mono',monospace; font-size:22px; background:#0c1219; border:1px solid var(--bd); border-radius:12px; padding:15px 21px; color:#dbe5ee; }
   .cmd .d{ color:var(--cyan); font-weight:700; }
-  .meta{ display:flex; gap:17px; margin-top:15px; font-size:13.5px; color:var(--mut); font-weight:500; }
-  .meta span{ display:flex; align-items:center; gap:6px; }
-  .dot{ width:5px; height:5px; border-radius:50%; background:var(--cyan); }
-
-  .term{ flex:1; align-self:center; background:linear-gradient(180deg,#0e141c,#0b1016); border:1px solid var(--bd); border-radius:15px; box-shadow:0 34px 74px -30px rgba(0,0,0,.78); overflow:hidden; }
-  .bar{ display:flex; gap:7px; padding:13px 16px; border-bottom:1px solid #1a232e; align-items:center; }
-  .bar i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
-  .bar .t{ margin-left:10px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#5e6b7a; }
-  .body{ padding:19px 21px; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.85; }
-  .body .ko{ font-family:'Pretendard',sans-serif; }
-  .score{ font-size:16.5px; font-weight:700; }
-  .score .g{ color:var(--amber); }
-  .row{ color:#aab6c4; display:flex; align-items:baseline; gap:8px; }
-  .row .id{ color:var(--red); font-weight:700; }
-  .row.cy .id{ color:var(--cyan); }
-  .row .x{ color:#5e6b7a; margin-left:auto; }
-  .fix{ color:#6f7d8c; font-size:12px; padding-left:2px; }
-  .fix b{ color:var(--cyan); font-weight:500; }
-  .hr{ height:1px; background:#18212c; margin:11px 0; }
+  .meta{ font-size:15px; color:#6c7b8b; font-weight:500; text-align:right; line-height:1.5; }
 </style>
 </head>
 <body>
   <div class="grid"></div>
   <div class="wrap">
-    <div class="left">
-      <div class="kicker">Claude Code · 토큰 진단 CLI</div>
+    <div class="top">
       <div class="brand">token<span class="b">habit</span></div>
-      <h1>Claude Code 토큰이 <em>어디서 새는지</em><br>내 로그를 읽어서 알려줍니다.</h1>
+      <div class="kicker">Claude Code</div>
+    </div>
 
-      <div class="steps">
-        <div class="st">
-          <div class="n">01</div><div class="t">스캔</div>
-          <div class="d">로컬 세션 로그<br>LLM 호출 없이</div>
-        </div>
-        <div class="st">
-          <div class="n">02</div><div class="t">진단</div>
-          <div class="d">낭비 점수 A~F<br>습관 순위</div>
-        </div>
-        <div class="st">
-          <div class="n">03</div><div class="t">처방</div>
-          <div class="d">습관마다<br>복붙 커맨드</div>
-        </div>
+    <div class="mid">
+      <div class="hero">
+        <div class="hl">토큰 낭비 점수 <span class="tagx">예시 리포트</span></div>
+        <div class="big"><span class="n">25%</span><span class="t">가 낭비</span></div>
+        <div class="lead">로컬 로그를 읽어 어디서 새는지 찾아주는 CLI.<br>습관마다 바로 칠 커맨드까지 같이 나옵니다.</div>
       </div>
 
-      <div class="foot">
-        <div class="cmd"><span class="d">$</span> uvx tokenhabit --lang ko</div>
-        <div class="meta">
-          <span><i class="dot"></i>설치 불필요</span>
-          <span><i class="dot"></i>의존성 0</span>
-          <span><i class="dot"></i>오프라인</span>
-          <span><i class="dot"></i>MIT</span>
-        </div>
+      <div class="chips">
+        <div class="chip"><span class="k">컨텍스트 과적재</span><span class="ar">→</span><span class="v">/compact</span></div>
+        <div class="chip"><span class="k">로그 통째로 붙여넣기</span><span class="ar">→</span><span class="v ko">에러 30줄만</span></div>
+        <div class="chip"><span class="k">최상위 모델 고정 주행</span><span class="ar">→</span><span class="v">/model</span></div>
       </div>
     </div>
 
-    <div class="term">
-      <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">tokenhabit — 습관 진단</span></div>
-      <div class="body">
-        <div class="score ko">토큰 낭비 점수: <span class="g">D</span> — 약 25% 낭비</div>
-        <div class="hr"></div>
-        <div class="row"><span class="id">[H1-03]</span> <span class="ko">컨텍스트 과적재</span> <span class="x">270,006 tok</span></div>
-        <div class="fix ko">→ 50K 넘기 전에 <b>/compact</b></div>
-        <div class="row"><span class="id">[H2-02]</span> <span class="ko">대형 툴 결과 적재</span> <span class="x">136,942 tok</span></div>
-        <div class="fix ko">→ 요청 전에 범위를 좁혀라</div>
-        <div class="row"><span class="id">[H2-01]</span> <span class="ko">파일 리드 재탕</span> <span class="x">×27</span></div>
-        <div class="fix ko">→ 재읽기 대신 컨텍스트 참조</div>
-        <div class="row cy"><span class="id">[H4-04]</span> <span class="ko">최상위 모델 고정</span> <span class="x">신호</span></div>
-        <div class="fix ko">→ 작업별로 <b>/model</b> 라우팅</div>
-      </div>
+    <div class="foot">
+      <div class="cmd"><span class="d">$</span> uvx tokenhabit --lang ko</div>
+      <div class="meta">설치 불필요 · 의존성 0 · LLM 호출 0 · 전부 로컬</div>
     </div>
   </div>
 </body>
