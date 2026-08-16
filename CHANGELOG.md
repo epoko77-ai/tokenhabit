@@ -5,6 +5,60 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.2] — 2026-08-16
+
+**Three factual errors in the catalog, and a hardcoded cache TTL that is wrong for
+most users. Found by an independent review (codex/gpt-5.6-sol) plus a re-read of
+the official prompt-caching documentation.**
+
+### Fixed — H4-03 said three things that are not true
+
+The v1.3.0 "what invalidates the cache" expansion was wrong on three counts.
+Corrected against [Claude Code prompt caching](https://code.claude.com/docs/en/prompt-caching):
+
+- **Editing CLAUDE.md mid-session does NOT invalidate the cache.** Project-root and
+  user CLAUDE.md are read once at session start and held in memory. The edit also
+  does not apply until `/clear`, `/compact`, or restart.
+- **Connecting or disconnecting an MCP server only invalidates the cache when its
+  tools are loaded into the prefix.** With tool search — the default on supported
+  models — the tools are deferred and the cache survives.
+- **Enabling or disabling a plugin only matters when the plugin provides an MCP
+  server.** Skills, commands, agents, hooks, LSP servers, monitors and themes never
+  invalidate the cache; their content is appended after the cached prefix.
+
+Also added the full official list of what does and does not invalidate the cache,
+including fast mode and whole-tool deny rules, and the fact that invoking a skill
+appends a user message rather than changing the prefix.
+
+### Fixed — cache TTL is not always five minutes
+
+`CACHE_TTL_SECONDS` was hardcoded to 300. Officially the TTL depends on how you
+authenticate: **one hour on a Claude subscription** (requested automatically),
+five minutes on an API key, Bedrock, Vertex or Foundry, and five minutes again when
+a subscription is drawing on usage credits. Subagents use five minutes even on a
+subscription.
+
+The log does not record the auth method, so the default is now 3600 — the common
+case for Claude Code — and `TOKENHABIT_CACHE_TTL` overrides it. This makes H4-03
+charge fewer model switches, not more: a longer window means more gaps count as
+"the cache was still warm anyway".
+
+### Fixed — a savings estimate that confused throughput with billing
+
+H3-01 claimed "trimming 3,000 tokens from CLAUDE.md saves 300,000 tokens over a
+100-turn session". CLAUDE.md sits in the cached prefix and is served at the cache
+read rate from the second turn onward, so multiplying by turn count describes
+context throughput, not cost. Replaced with what can honestly be said — the
+per-session context reduction — plus the actual cost formula.
+
+### Changed
+
+- The evidence grades from 1.3.1 now appear consistently in the skill, the coaching
+  checklist and both READMEs. 1.3.1 fixed the code but left four documents saying
+  "measured" for character conversions.
+
+---
+
 ## [1.3.1] — 2026-08-16
 
 **A labelling correction. Two patterns claimed their numbers came from the log's
@@ -173,6 +227,7 @@ same version and the same `--days` window.
 
 - Claude Code skill: catalog, measurement adapter, runtime hook.
 
+[1.3.2]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.3.2
 [1.3.1]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.3.1
 [1.3.0]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.3.0
 [1.2.1]: https://github.com/epoko77-ai/tokenhabit/releases/tag/v1.2.1

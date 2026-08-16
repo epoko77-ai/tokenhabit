@@ -177,15 +177,26 @@ def test_cache_kill_needs_real_model_switch():
     check("real switch counted", r2["H4-03_cache_kills"], 1)
     check("re-warm is measured", r2["H4-03_cache_kill_tokens"], 40_000)
 
-    # A switch after the 5-min TTL would have expired anyway -> not charged.
-    lines3 = [
+    # A switch after the cache TTL would have expired anyway -> not charged.
+    # TTL depends on auth: 1h on a Claude subscription, 5m on an API key. We
+    # default to the subscription value, so a 30-minute gap is still warm.
+    warm = [
         assistant("m0", model="claude-opus-5", usage=usage(inp=100, cr=40_000),
                   ts="2026-08-12T10:00:00.000Z"),
         assistant("m1", model="claude-haiku-4-5", usage=usage(inp=100, cc=40_000),
                   ts="2026-08-12T10:30:00.000Z"),
     ]
-    r3 = analyze_session(write_session(lines3))
-    check("switch past cache TTL not charged", r3["H4-03_cache_kills"], 0)
+    check("30-min gap is still inside the 1h subscription TTL",
+          analyze_session(write_session(warm))["H4-03_cache_kills"], 1)
+
+    cold = [
+        assistant("m0", model="claude-opus-5", usage=usage(inp=100, cr=40_000),
+                  ts="2026-08-12T10:00:00.000Z"),
+        assistant("m1", model="claude-haiku-4-5", usage=usage(inp=100, cc=40_000),
+                  ts="2026-08-12T12:30:00.000Z"),
+    ]
+    check("switch past cache TTL not charged",
+          analyze_session(write_session(cold))["H4-03_cache_kills"], 0)
 
 
 # ─── H5: subagent transcripts are not the driver's habits ─────────────────────

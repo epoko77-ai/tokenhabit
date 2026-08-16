@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 import json
+import os
 
 CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
 
@@ -38,7 +39,20 @@ SESSION_MAX_MINUTES = 35          # above this = long session (H1-01)
 CONTEXT_MAX_TOKENS = 50_000       # per-turn context size ceiling (H1-01 / H1-03)
 READS_PER_TURN_FLAG = 4           # >= this many Reads in one turn = main-thread sweep (H8-01)
 TASKS_PER_SESSION_FLAG = 6        # >= this many subagent spawns in one session (H8-03)
-CACHE_TTL_SECONDS = 300           # prompt-cache TTL, 5 min (Anthropic docs)
+# Prompt-cache TTL differs by how you authenticate (official docs):
+#   Claude subscription (Pro/Max) -> 1 hour, requested automatically
+#   API key / Bedrock / Vertex / Foundry -> 5 minutes
+#   Subscription drawing on usage credits -> drops back to 5 minutes
+#   Subagents -> 5 minutes even on a subscription
+# The log does not record the auth method, so we cannot know which applied. We
+# default to the subscription value because Claude Code's common case is a
+# subscription, and because over-charging a habit is worse than missing one:
+# a longer window means fewer gaps get counted as "the cache was still warm".
+CACHE_TTL_SECONDS = 3600          # override with TOKENHABIT_CACHE_TTL
+
+_ttl_override = os.environ.get("TOKENHABIT_CACHE_TTL")
+if _ttl_override and _ttl_override.isdigit():
+    CACHE_TTL_SECONDS = int(_ttl_override)
 
 # H4-04: model ids containing these markers are top-tier (most expensive) models.
 TOP_TIER_MARKERS = ("opus", "fable")

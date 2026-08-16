@@ -30,7 +30,7 @@ network access is the opt-in `--ccusage` flag.
 $ uvx tokenhabit
 
 ════════════════════════════════════════════════════════════════
-tokenhabit — habit scan   2026-08-15 12:40
+tokenhabit — habit scan   2026-08-16 09:00
 Window: last 7d  |  session files: 6  |  analyzed: 6
 ════════════════════════════════════════════════════════════════
 
@@ -43,19 +43,19 @@ Window: last 7d  |  session files: 6  |  analyzed: 6
 ────────────────────────────────────────────────────────────────
 
   [H5-04] Inviting verbose output  ×97
-  est. waste: ~77,600 tokens (scenario constant x hits)
+  heuristic waste: ~77,600 tokens (scenario constant x hits)
   fix: Cap the output: "in 2 lines", "no code or examples". Set response defaults in CLAUDE.md.
 
   [H2-01] Re-reading the same file  ×27
-  est. waste: ~54,000 tokens (scenario constant x hits)
+  heuristic waste: ~54,000 tokens (scenario constant x hits)
   fix: Reference what you already read ("from the X you read earlier...") instead of re-Reading. Block it with a PreToolUse hook.
 
   [H2-02] Oversized tool results pulled into context  ×23
-  measured waste: 136,942 tokens (from logged token counts)
+  estimated waste: ~136,942 tokens (real content, chars converted to tokens)
   fix: Narrow the request before you make it: read a line range, grep first, or save the payload to a file and pass the path.
 
   [H8-02] stdout flood (large Bash output)  ×6
-  measured waste: 35,724 tokens (from logged token counts)
+  estimated waste: ~35,724 tokens (real content, chars converted to tokens)
   fix: Add | head -50 or a grep filter to Bash commands. Save output to a file and pass the path.
 
   [H1-01] Topic drift (long session carrying a heavy context)  ×6
@@ -63,11 +63,11 @@ Window: last 7d  |  session files: 6  |  analyzed: 6
   fix: When the task changes, /clear. Name the session with /rename first if you plan to come back via claude --resume.
 
   [H1-03] Context overrun (peak turn context past the ceiling)  ×6
-  measured waste: 270,006 tokens (from logged token counts)
+  observed waste: 270,006 tokens (from the log's own token counters)
   fix: Run /compact [focus] before the context passes ~50K. Every later turn re-sends whatever you let pile up.
 
   [H8-01] Main-thread exploration (many Reads in one turn)  ×6
-  est. waste: ~30,000 tokens (scenario constant x hits)
+  heuristic waste: ~30,000 tokens (scenario constant x hits)
   fix: Delegate exploration to a subagent: "search src/auth/ and return only function names + locations."
 
   [H4-04] Top-tier-only driving (never switched models)  ×4
@@ -80,6 +80,8 @@ Window: last 7d  |  session files: 6  |  analyzed: 6
   Share: I was wasting ~25% of my Claude Code tokens. Top leak: Context overrun (peak turn context past the ceiling). — tokenhabit
 
   * Numbers are trend-spotting approximations, not exact billing.
+  * Waste is graded: observed = the log's token counters; estimated =
+    real content with characters converted to tokens; heuristic = a constant.
   * A turn is one message id, so parallel tool calls count as one turn.
     Context size = input + cache_read + cache_creation of a single turn.
   * H8-01 = sessions with >=4 Reads piled into a single turn (heuristic).
@@ -164,9 +166,11 @@ so voluminous they'd dilute every score to ~1%.
 
 Waste comes in three flavours and the report labels each one:
 
-- **measured** — taken from token counts the log actually recorded (oversized tool
-  results, the cache re-warm a model switch forced, context carried past the ceiling)
-- **estimated** — a scenario constant multiplied by a hit count; directional only
+- **observed** — the log's own token counters: the cache re-warm a model switch
+  forced, context carried past the ceiling
+- **estimated** — real content, but characters converted to tokens rather than
+  counted: oversized tool results
+- **heuristic** — a scenario constant multiplied by a hit count; directional only
 - **signal** — counted and shown, but *not* scored. A long session, a web search, a
   subagent, or staying on one model tier is not waste by itself.
 

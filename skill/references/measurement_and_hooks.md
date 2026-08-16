@@ -231,8 +231,12 @@ tokenhabit hook_check.py
 |---|---|
 | 캐시 읽기 | 기본 입력가의 **0.1x** |
 | 캐시 쓰기 | **1.25x** (5분 TTL) / **2x** (1시간 TTL) |
-| TTL | **5분**(기본) 또는 **1시간** |
+| TTL — API 키·Bedrock·Vertex·Foundry | **5분** (기본) |
+| TTL — Claude 구독(Pro/Max) | **1시간**, 자동 요청. usage credit 사용 시 5분으로 하락 |
+| TTL — 서브에이전트 | **5분** (구독이어도) |
 | 무효화 계층 | `tools` → `system` → `messages` (상위가 바뀌면 그 아래 전부 무효) |
+| 캐시를 죽이는 것 | 모델 전환 · effort 변경(캐시 키의 일부) · fast mode 켜기 · MCP 연결/해제(**프리픽스 로드일 때만**) · 플러그인 토글(**MCP 제공 시만**) · 툴 전체 deny · `/compact` · Claude Code 업그레이드 |
+| 캐시를 **죽이지 않는** 것 | CLAUDE.md 세션 중 편집(적용도 안 됨) · output style 변경 · permission mode 전환 · **스킬·커맨드 호출**(user message로 append) · `/recap` · `/rewind` · 서브에이전트 스폰 |
 | 최소 캐시 가능 토큰 | 모델별 **512~4,096** |
 | 캐시 브레이크포인트 | 최대 **4개** |
 
