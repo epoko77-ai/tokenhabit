@@ -26,9 +26,11 @@ Use the cheapest model available and keep the prompt to the slash command.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -179,6 +181,103 @@ def run_context(model: str) -> str:
     return proc.stdout
 
 
+def make_snapshot(data: dict, hooks: list[dict]) -> dict:
+    """A baseline is only comparable to one taken the same way, so record how."""
+    return {
+        "snapshot_version": 1,
+        "taken_at": datetime.now(timezone.utc).isoformat(),
+        "cwd": os.getcwd(),
+        "context": data,
+        "instructions_loaded": hooks,
+    }
+
+
+_COMPARABILITY_KEYS = (
+    ("model", lambda s: s["context"].get("model")),
+    ("cwd", lambda s: s.get("cwd")),
+    ("window_tokens", lambda s: s["context"].get("window_tokens")),
+)
+
+
+def _fmt_delta(before: int, after: int) -> str:
+    d = after - before
+    if d == 0:
+        return f"{after:>8,}      ="
+    pct = f"{d / before * 100:+.0f}%" if before else "   —"
+    return f"{after:>8,}  {d:+8,} {pct:>6}"
+
+
+def diff_snapshots(before: dict, after: dict) -> int:
+    print()
+    print("═" * 70)
+    print("베이스라인 비교 — before / after")
+    print("═" * 70)
+    print(f"before: {before.get('taken_at')}")
+    print(f"after : {after.get('taken_at')}")
+
+    mismatches = [
+        (name, get(before), get(after))
+        for name, get in _COMPARABILITY_KEYS
+        if get(before) != get(after)
+    ]
+    if mismatches:
+        print()
+        print("⚠ 비교 조건이 다릅니다 — 이 diff는 개입 효과로 읽으면 안 됩니다:")
+        for name, b, a in mismatches:
+            print(f"    {name}: {b}  →  {a}")
+
+    bc, ac = before["context"], after["context"]
+    print()
+    print("[총량]")
+    bt, at = bc.get("total_tokens") or 0, ac.get("total_tokens") or 0
+    print(f"  입력 전 로드            {_fmt_delta(bt, at)}")
+
+    print()
+    print("[범주별]")
+    keys = sorted(set(bc["categories"]) | set(ac["categories"]),
+                  key=lambda k: -(ac["categories"].get(k, 0)))
+    for k in keys:
+        if k.lower() == "free space":
+            continue
+        b, a = bc["categories"].get(k, 0), ac["categories"].get(k, 0)
+        if b == a == 0:
+            continue
+        tag = " (지연)" if "deferred" in k.lower() else ""
+        print(f"  {k + tag:28}{_fmt_delta(b, a)}")
+
+    for key, label in (("custom_agents", "커스텀 에이전트"), ("skills", "스킬"),
+                       ("memory_files", "메모리 파일"), ("mcp_tools", "MCP 툴")):
+        b_items = {e["name"]: e for e in bc["items"].get(key, [])}
+        a_items = {e["name"]: e for e in ac["items"].get(key, [])}
+        removed = sorted(set(b_items) - set(a_items))
+        added = sorted(set(a_items) - set(b_items))
+        if not removed and not added:
+            continue
+        print()
+        print(f"[{label}] 제거 {len(removed)} · 추가 {len(added)}")
+        for n in removed[:8]:
+            print(f"  - {b_items[n]['tokens'] or 0:>6,}  {n}")
+        if len(removed) > 8:
+            print(f"    … 외 {len(removed) - 8}개 제거")
+        for n in added[:8]:
+            print(f"  + {a_items[n]['tokens'] or 0:>6,}  {n}")
+        if len(added) > 8:
+            print(f"    … 외 {len(added) - 8}개 추가")
+
+    print()
+    print("─" * 70)
+    print("  이 diff가 말하는 것: 세션 시작 시 로드되는 컨텍스트가 이만큼 변했다.")
+    print("  이 diff가 말하지 않는 것:")
+    print("    * 비용 절감액 — 프리픽스는 2번째 턴부터 캐시 읽기(0.1x)로 서빙된다.")
+    print("      토큰 감소분에 턴 수를 곱하지 마라.")
+    print("    * 이 변화의 원인 — 같은 기간에 다른 변경이 있었을 수 있다.")
+    print("    * 작업 품질에 미친 영향 — 컨텍스트를 줄여 결과가 나빠졌을 수 있다.")
+    print("      guardrail 지표 없이 개선이라 부르지 마라.")
+    print("═" * 70)
+    print()
+    return 0
+
+
 def render(data: dict, hook_records: list[dict]) -> None:
     total = data["total_tokens"] or 0
     window = data["window_tokens"] or 0
@@ -251,7 +350,14 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--model", default="claude-haiku-4-5", help="측정용 모델 (기본: 가장 싼 것)")
     ap.add_argument("--json", action="store_true", help="기계 판독 출력")
     ap.add_argument("--save", type=Path, help="원본 캡처를 저장할 경로")
+    ap.add_argument("--snapshot", type=Path, help="파싱 결과를 스냅샷 JSON으로 저장 (비교용)")
+    ap.add_argument("--diff", nargs=2, type=Path, metavar=("BEFORE", "AFTER"),
+                    help="스냅샷 두 개를 비교")
     args = ap.parse_args(argv)
+
+    if args.diff:
+        before, after = (json.loads(p.read_text(encoding="utf-8")) for p in args.diff)
+        return diff_snapshots(before, after)
 
     text = args.src.read_text(encoding="utf-8") if args.src else run_context(args.model)
     if args.save:
@@ -260,6 +366,13 @@ def main(argv: list[str]) -> int:
 
     data = parse_context(text)
     hooks = load_hook_capture()
+
+    if args.snapshot:
+        args.snapshot.parent.mkdir(parents=True, exist_ok=True)
+        args.snapshot.write_text(
+            json.dumps(make_snapshot(data, hooks), ensure_ascii=False, indent=2),
+            encoding="utf-8")
+        print(f"스냅샷 저장: {args.snapshot}", file=sys.stderr)
 
     if args.json:
         data["instructions_loaded"] = hooks
