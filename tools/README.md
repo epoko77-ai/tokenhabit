@@ -89,6 +89,57 @@ python3 tools/probe_instructions_loaded.py --show
 
 ---
 
+## export_team.py — content-free 팀 export
+
+```bash
+python3 tools/export_team.py --snapshot before.json --scan-json scan.json --out export.json
+python3 tools/export_team.py --audit --snapshot before.json     # 무엇이 나가고 안 나가는지
+```
+
+### 구조적 보장 — 지우지 않고 짓는다
+
+이 도구는 스냅샷에서 민감 필드를 **지우지 않습니다.** 빈 문서에서 시작해
+**허용목록에 있는 것만 복사**합니다. 지우는 방식은 새 버전이 추가한 필드를
+빠뜨릴 수 있지만, 허용목록은 그럴 수 없습니다.
+
+`--audit` 이 필드별로 무엇이 나가고 무엇이 안 나가는지 출력하므로,
+고객 보안팀이 코드를 읽지 않고도 검토할 수 있습니다.
+
+### 나가지 않는 것
+
+| 항목 | 이유 |
+|---|---|
+| `cwd` | 사용자명 + 레포 정체 |
+| 파일 절대경로 | 사용자명 + 디렉토리 구조 |
+| 항목 이름(에이전트·스킬) | **내부 프로젝트명이 드러남** — 이 머신 실제 예: `policyblind-…`, `wikibrain-…` |
+| 메모리 파일 이름 | 경로 그 자체. **`--name-mode raw` 에서도 절대 노출 안 함** |
+| MCP 서버명 | 벤더 관계가 드러남 |
+| session_id · transcript_path | 개인 특정 |
+| 프롬프트·출력·툴 인자 | 애초에 읽지 않음 |
+
+### 가명화
+
+조직 salt로 HMAC. 같은 salt에서 **가명이 안정적**이라 두 시점을 대조할 수 있고,
+salt가 다르면 **조직 간 대조는 불가능**합니다. salt 원문은 export에 안 들어가고
+지문(fingerprint)만 실려서 "같은 salt인지"만 확인됩니다.
+
+> ⚠️ salt를 잃으면 과거 export와 대조할 수 없습니다. 커밋하지 말고 따로 보관하세요.
+> 그리고 **hashing만으로는 익명화가 아닙니다** — 코호트가 작으면 역추적됩니다.
+
+### k-익명성
+
+기본 하한 5명. 미달이면 `sufficient: false`와 사유가 실리고 경고가 뜹니다.
+상위 조직에 합산하거나 `insufficient data` 로 보고해야 합니다.
+
+### 회귀 테스트
+
+`tests/test_export_leaks.py` 가 합성 스냅샷에 사용자명·절대경로·내부
+프로젝트명·벤더명·session_id를 심어두고 **하나라도 export에 살아남으면 실패**합니다.
+CI에서 매 push마다 돕니다. 실제로 이 테스트가 `--name-mode raw` 의 경로 누출을
+잡아냈습니다.
+
+---
+
 ## 측정 시 주의
 
 - `--from` 없이 실행하면 **실제 Claude Code 세션이 뜬다.** 토큰을 쓴다.

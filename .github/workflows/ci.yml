@@ -34,3 +34,6 @@ jobs:
 
       - name: Detector regression on a synthetic session
         run: python3 tests/test_detectors.py
+
+      - name: Export leak tests (nothing identifying may leave the machine)
+        run: python3 tests/test_export_leaks.py

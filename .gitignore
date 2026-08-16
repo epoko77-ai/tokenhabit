@@ -15,3 +15,7 @@ node_modules/
 
 # 프로브 캡처(세션 경로·머신 고유값 포함)
 tools/_probe/
+
+# 조직 가명화 salt — 커밋 금지
+*.tokenhabit-org-salt
+tools/_probe/salt
